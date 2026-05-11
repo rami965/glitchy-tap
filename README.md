@@ -3,7 +3,6 @@
 Independent mobile game studio. This repository is the source for the GlitchyTap GitHub Pages site — a unified hub for all game landing pages, privacy policies, and studio information.
 
 **Live site:** `https://rami965.github.io/glitchy-tap/`
-*(Enable GitHub Pages → Settings → Pages → Branch: `main` / Folder: `/` to activate)*
 
 ---
 
@@ -11,7 +10,6 @@ Independent mobile game studio. This repository is the source for the GlitchyTap
 
 One repo, one deployment. Every game published by GlitchyTap gets its own subdirectory here with:
 - A landing page (`index.html`)
-- A privacy policy (`privacy-policy/index.html`)
 
 No build tools, no frameworks, no dependencies. Pure HTML/CSS served directly by GitHub Pages.
 
