@@ -3,140 +3,471 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — Deep Break</title>
+  <title>Privacy Policy — Deep Break | GlitchyTap</title>
+  <meta name="description" content="Deep Break collects zero personal data. Read the full privacy policy for the Deep Break mobile game by GlitchyTap." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f0f0f;
-      color: #d0d0d0;
-      line-height: 1.7;
-      padding: 2rem 1rem;
+    :root {
+      --bg:          #050b14;
+      --cyan:        #00d4ff;
+      --cyan-dim:    rgba(0, 212, 255, 0.1);
+      --cyan-border: rgba(0, 212, 255, 0.2);
+      --violet:      #7b2fff;
+      --green:       #39ff84;
+      --text:        #e8f4ff;
+      --muted:       #4a6a8a;
+      --card-bg:     #0a1828;
+      --card-border: #132035;
     }
-    .container { max-width: 720px; margin: 0 auto; }
-    nav { margin-bottom: 2.5rem; }
-    nav a { font-size: 0.875rem; color: #666; text-decoration: none; }
-    nav a:hover { color: #aaa; }
-    h1 { font-size: 2rem; color: #f0f0f0; margin-bottom: 0.5rem; }
-    .meta { font-size: 0.85rem; color: #666; margin-bottom: 2.5rem; }
-    h2 { font-size: 1.1rem; color: #f0f0f0; margin: 2rem 0 0.75rem; }
-    p { margin-bottom: 1rem; }
-    ul { padding-left: 1.5rem; margin-bottom: 1rem; }
-    ul li { margin-bottom: 0.35rem; }
-    strong { color: #f0f0f0; }
-    a { color: #aaa; }
-    a:hover { color: #f0f0f0; }
-    hr { border: none; border-top: 1px solid #222; margin: 2rem 0; }
-    .note { font-size: 0.85rem; color: #666; font-style: italic; }
-    footer { margin-top: 4rem; font-size: 0.75rem; color: #333; }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    /* ─── Bubbles ─── */
+    .bubbles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bubble {
+      position: absolute;
+      bottom: -60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.18), transparent 70%);
+      border: 1px solid rgba(0,212,255,0.08);
+      animation: rise linear infinite;
+    }
+    .bubble:nth-child(1) { width:6px;  height:6px;  left:9%;  animation-duration:14s; animation-delay:0s;  opacity:.5; }
+    .bubble:nth-child(2) { width:10px; height:10px; left:24%; animation-duration:19s; animation-delay:3s;  opacity:.3; }
+    .bubble:nth-child(3) { width:5px;  height:5px;  left:42%; animation-duration:11s; animation-delay:6s;  opacity:.6; }
+    .bubble:nth-child(4) { width:14px; height:14px; left:61%; animation-duration:22s; animation-delay:1s;  opacity:.18; }
+    .bubble:nth-child(5) { width:7px;  height:7px;  left:78%; animation-duration:16s; animation-delay:4s;  opacity:.45; }
+    .bubble:nth-child(6) { width:4px;  height:4px;  left:91%; animation-duration:9s;  animation-delay:7s;  opacity:.7; }
+    @keyframes rise {
+      0%   { transform: translateY(0) translateX(0);    opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: .4; }
+      100% { transform: translateY(-110vh) translateX(12px); opacity: 0; }
+    }
+
+    /* ─── Page layout ─── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    /* ─── Top nav ─── */
+    .back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 3.5rem;
+      transition: color .2s;
+    }
+    .back-nav:hover { color: var(--cyan); }
+    .back-nav svg { width: 12px; height: 12px; }
+
+    /* ─── Page header ─── */
+    .page-header { margin-bottom: 3rem; }
+    .page-kicker {
+      font-family: 'Space Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--violet);
+      opacity: .85;
+      margin-bottom: .85rem;
+    }
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1.5px;
+      color: var(--text);
+      text-shadow: 0 0 60px rgba(0,212,255,.15);
+      margin-bottom: 1rem;
+    }
+    .page-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .page-meta span { opacity: .7; }
+
+    /* ─── Zero-data callout ─── */
+    .callout {
+      background: var(--cyan-dim);
+      border: 1px solid var(--cyan-border);
+      border-radius: 8px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .callout::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    }
+    .callout-label {
+      font-family: 'Space Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      opacity: .75;
+      margin-bottom: .6rem;
+    }
+    .callout p {
+      font-size: .95rem;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+    }
+    .callout strong { color: var(--cyan); font-weight: 500; }
+
+    /* ─── Sections ─── */
+    .policy-section {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 0 1.75rem;
+      padding: 2.25rem 0;
+      border-top: 1px solid var(--card-border);
+      align-items: start;
+    }
+    .section-num {
+      font-family: 'Space Mono', monospace;
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--cyan);
+      opacity: .35;
+      letter-spacing: 1px;
+      padding-top: .3rem;
+      user-select: none;
+    }
+    .section-body {}
+    h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .85rem;
+      letter-spacing: -.2px;
+    }
+    p { font-size: .9rem; color: #8aadcc; margin-bottom: .85rem; }
+    p:last-child { margin-bottom: 0; }
+    p strong { color: var(--text); font-weight: 500; }
+
+    /* List */
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 .85rem;
+    }
+    ul li {
+      font-size: .9rem;
+      color: #8aadcc;
+      padding: .3rem 0 .3rem 1.25rem;
+      position: relative;
+      line-height: 1.55;
+    }
+    ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: .68rem;
+      width: 5px;
+      height: 1px;
+      background: var(--cyan);
+      opacity: .4;
+    }
+
+    /* Inline link */
+    a.inline {
+      color: var(--cyan);
+      opacity: .75;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(0,212,255,.25);
+      transition: opacity .2s, border-color .2s;
+      font-size: inherit;
+    }
+    a.inline:hover { opacity: 1; border-color: var(--cyan); }
+
+    /* ─── Closing note ─── */
+    .closing-note {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--card-border);
+      font-family: 'Space Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      opacity: .6;
+      font-style: normal;
+      line-height: 1.8;
+    }
+
+    /* ─── Footer ─── */
+    .site-footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-brand {
+      font-family: 'Syne', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .footer-nav { display: flex; gap: 1.5rem; }
+    .footer-nav a {
+      font-size: .78rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .footer-nav a:hover { color: var(--text); }
+
+    @media (max-width: 520px) {
+      .policy-section { grid-template-columns: 1fr; gap: .3rem; }
+      .section-num { font-size: .52rem; }
+      .site-footer { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <nav><a href="../">&larr; Back to Deep Break</a></nav>
 
-    <h1>Privacy Policy for Deep Break</h1>
-    <p class="meta">
-      <strong>Effective date:</strong> May 3, 2026 &nbsp;&middot;&nbsp;
-      <strong>Last updated:</strong> May 3, 2026
-    </p>
-
-    <p>
-      This Privacy Policy describes how the <strong>Deep Break</strong> mobile game
-      ("the App", "we", "our", or "us") handles information when you use it. The App is
-      developed and published by <strong>GlitchyTap</strong>.
-    </p>
-
-    <h2>1. Summary</h2>
-    <p><strong>We do not collect, store, transmit, or share any personal data.</strong></p>
-    <p>
-      Deep Break is a single-player offline arcade game. It works entirely on your device
-      and does not require an account, an internet connection, or any sign-in.
-    </p>
-
-    <h2>2. Information We Collect</h2>
-    <p><strong>None.</strong> The App does not collect any of the following:</p>
-    <ul>
-      <li>Personal information (name, email, phone number, address)</li>
-      <li>Account information or login credentials</li>
-      <li>Device identifiers (advertising ID, IMEI, MAC address)</li>
-      <li>Location data</li>
-      <li>Contacts, photos, microphone, or camera data</li>
-      <li>Usage analytics or telemetry</li>
-      <li>Crash reports sent to a remote server</li>
-    </ul>
-    <p>
-      The App does not contain any third-party SDKs that collect data, including (but not
-      limited to) Google Analytics, Firebase Analytics, Facebook SDK, AppsFlyer, Adjust,
-      Unity Analytics, or advertising networks.
-    </p>
-
-    <h2>3. Data Stored Locally on Your Device</h2>
-    <p>
-      The App saves your <strong>game progress and high scores</strong> locally on your
-      device using the operating system's standard local storage. This data:
-    </p>
-    <ul>
-      <li>Never leaves your device.</li>
-      <li>Is not transmitted to us or to any third party.</li>
-      <li>Is automatically deleted if you uninstall the App or clear the App's data through your device settings.</li>
-    </ul>
-
-    <h2>4. Permissions</h2>
-    <p>
-      The App does not request any sensitive runtime permissions. Standard system permissions
-      automatically granted to all apps (such as access to the App's own storage area) are
-      used solely for saving local game progress as described above.
-    </p>
-
-    <h2>5. Advertisements</h2>
-    <p>The App <strong>does not display advertisements</strong> and does not use any advertising SDKs.</p>
-
-    <h2>6. In-App Purchases</h2>
-    <p>The App <strong>does not offer in-app purchases</strong>.</p>
-
-    <h2>7. Children's Privacy</h2>
-    <p>
-      The App is suitable for users of all ages and <strong>does not knowingly collect any
-      information from children under 13</strong> (or the equivalent minimum age in your
-      jurisdiction). Because the App collects no data at all, no special handling is required
-      for users of any age.
-    </p>
-
-    <h2>8. Third-Party Services</h2>
-    <p>The App does not integrate with any third-party services that collect or process personal data.</p>
-    <p>
-      The App is distributed through the <strong>Google Play Store</strong>, which is operated
-      by Google LLC. Google may collect information about your download and installation of the
-      App according to its own privacy policy:
-      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">https://policies.google.com/privacy</a>.
-      We do not control and are not responsible for Google's data practices.
-    </p>
-
-    <h2>9. Security</h2>
-    <p>
-      Because no personal data is collected or transmitted, there is no personal data at risk
-      of breach on our side. Data stored locally on your device is protected by your device's
-      own security features (lock screen, encryption, etc.).
-    </p>
-
-    <h2>10. Changes to This Privacy Policy</h2>
-    <p>
-      We may update this Privacy Policy from time to time. Any changes will be posted on this
-      page with an updated "Last updated" date. We encourage you to review this page periodically.
-    </p>
-
-    <h2>11. Contact Us</h2>
-    <p>If you have questions or concerns about this Privacy Policy, contact us at:</p>
-    <p><strong>Email:</strong> <a href="mailto:ramisaid33@gmail.com">ramisaid33@gmail.com</a></p>
-
-    <hr />
-    <p class="note">
-      This privacy policy applies only to the Deep Break mobile game and not to any other
-      apps, websites, or services.
-    </p>
-
-    <footer>&copy; 2026 GlitchyTap. All rights reserved.</footer>
+  <!-- Subtle background bubbles -->
+  <div class="bubbles" aria-hidden="true">
+    <div class="bubble"></div><div class="bubble"></div>
+    <div class="bubble"></div><div class="bubble"></div>
+    <div class="bubble"></div><div class="bubble"></div>
   </div>
+
+  <main class="page">
+
+    <a class="back-nav" href="../">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M8 2L4 6l4 4"/>
+      </svg>
+      Back to Deep Break
+    </a>
+
+    <!-- Header -->
+    <header class="page-header">
+      <p class="page-kicker">// Legal</p>
+      <h1>Privacy Policy</h1>
+      <div class="page-meta">
+        <span>Effective: May 3, 2026</span>
+        <span>Last updated: May 3, 2026</span>
+        <span>App: Deep Break · GlitchyTap</span>
+      </div>
+    </header>
+
+    <!-- Zero-data callout -->
+    <div class="callout" role="note">
+      <p class="callout-label">// TL;DR</p>
+      <p>
+        <strong>We collect nothing.</strong> Deep Break is a single-player offline game.
+        It works entirely on your device — no account, no internet connection, no sign-in required.
+        No personal data is ever collected, stored, or transmitted.
+      </p>
+    </div>
+
+    <!-- Sections -->
+    <div role="document">
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">01</span>
+        <div class="section-body">
+          <h2>Summary</h2>
+          <p><strong>We do not collect, store, transmit, or share any personal data.</strong></p>
+          <p>
+            Deep Break is a single-player offline arcade game. It works entirely on your device
+            and does not require an account, an internet connection, or any sign-in.
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">02</span>
+        <div class="section-body">
+          <h2>Information We Collect</h2>
+          <p><strong>None.</strong> The App does not collect any of the following:</p>
+          <ul>
+            <li>Personal information (name, email, phone number, address)</li>
+            <li>Account information or login credentials</li>
+            <li>Device identifiers (advertising ID, IMEI, MAC address)</li>
+            <li>Location data</li>
+            <li>Contacts, photos, microphone, or camera data</li>
+            <li>Usage analytics or telemetry</li>
+            <li>Crash reports sent to a remote server</li>
+          </ul>
+          <p>
+            The App does not contain any third-party SDKs that collect data, including (but not
+            limited to) Google Analytics, Firebase Analytics, Facebook SDK, AppsFlyer, Adjust,
+            Unity Analytics, or advertising networks.
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">03</span>
+        <div class="section-body">
+          <h2>Data Stored Locally on Your Device</h2>
+          <p>
+            The App saves your <strong>game progress and high scores</strong> locally on your
+            device using the operating system's standard local storage. This data:
+          </p>
+          <ul>
+            <li>Never leaves your device.</li>
+            <li>Is not transmitted to us or to any third party.</li>
+            <li>Is automatically deleted if you uninstall the App or clear the App's data through your device settings.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">04</span>
+        <div class="section-body">
+          <h2>Permissions</h2>
+          <p>
+            The App does not request any sensitive runtime permissions. Standard system permissions
+            automatically granted to all apps (such as access to the App's own storage area) are
+            used solely for saving local game progress as described above.
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">05</span>
+        <div class="section-body">
+          <h2>Advertisements</h2>
+          <p>The App <strong>does not display advertisements</strong> and does not use any advertising SDKs.</p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">06</span>
+        <div class="section-body">
+          <h2>In-App Purchases</h2>
+          <p>The App <strong>does not offer in-app purchases</strong>.</p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">07</span>
+        <div class="section-body">
+          <h2>Children's Privacy</h2>
+          <p>
+            The App is suitable for users of all ages and <strong>does not knowingly collect any
+            information from children under 13</strong> (or the equivalent minimum age in your
+            jurisdiction). Because the App collects no data at all, no special handling is required
+            for users of any age.
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">08</span>
+        <div class="section-body">
+          <h2>Third-Party Services</h2>
+          <p>The App does not integrate with any third-party services that collect or process personal data.</p>
+          <p>
+            The App is distributed through the <strong>Google Play Store</strong>, operated by Google LLC.
+            Google may collect information about your download and installation according to their own
+            privacy policy: <a class="inline" href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.
+            We do not control and are not responsible for Google's data practices.
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">09</span>
+        <div class="section-body">
+          <h2>Security</h2>
+          <p>
+            Because no personal data is collected or transmitted, there is no personal data at risk
+            of breach on our side. Data stored locally on your device is protected by your device's
+            own security features (lock screen, encryption, etc.).
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">10</span>
+        <div class="section-body">
+          <h2>Changes to This Privacy Policy</h2>
+          <p>
+            We may update this Privacy Policy from time to time. Any changes will be posted on this
+            page with an updated "Last updated" date. We encourage you to review this page periodically.
+          </p>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <span class="section-num" aria-hidden="true">11</span>
+        <div class="section-body">
+          <h2>Contact Us</h2>
+          <p>If you have questions or concerns about this Privacy Policy, contact us at:</p>
+          <p>
+            <strong>Email:</strong>
+            <a class="inline" href="mailto:ramisaid33@gmail.com">ramisaid33@gmail.com</a>
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="closing-note">
+      This privacy policy applies only to the Deep Break mobile game<br>
+      and not to any other apps, websites, or services.
+    </p>
+
+    <footer class="site-footer">
+      <a class="footer-brand" href="../../">GlitchyTap</a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="../">Deep Break</a>
+        <a href="../../">All Games</a>
+      </nav>
+    </footer>
+
+  </main>
+
 </body>
 </html>
