@@ -328,30 +328,44 @@
       display: block;
     }
 
-    /* Fullscreen centering */
-    .cabinet-screen:-webkit-full-screen {
+    /* ── Glass modal fullscreen ── */
+    body.glass-fs { overflow: hidden; }
+
+    body.glass-fs .cabinet-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #050714;
+      background: rgba(5, 7, 20, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 0;
+      aspect-ratio: unset;
+      max-height: none;
       overflow: auto;
     }
 
-    .cabinet-screen:fullscreen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #050714;
-      overflow: auto;
+    body.glass-fs .cabinet-screen iframe {
+      width: 400px;
+      height: 680px;
+      max-height: 86vh;
+      max-width: 90vw;
+      border-radius: 14px;
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,.18),
+        0 0 50px rgba(0,229,255,.14),
+        0 40px 100px rgba(0,0,0,.6);
     }
 
-    /* Close button — visible only in fullscreen */
+    /* Close button — visible only in glass fullscreen */
     .fs-close {
       display: none;
       position: absolute;
-      top: 1rem;
-      right: 1rem;
-      z-index: 9999;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 1001;
       align-items: center;
       gap: .4rem;
       padding: .45rem .9rem;
@@ -368,8 +382,7 @@
       transition: border-color .2s, background .2s;
     }
 
-    .cabinet-screen:-webkit-full-screen .fs-close { display: flex; }
-    .cabinet-screen:fullscreen .fs-close { display: flex; }
+    body.glass-fs .fs-close { display: flex; }
     .fs-close:hover { border-color: rgba(255,255,255,.45); background: rgba(5,7,20,.96); }
 
     /* Cabinet bar */
@@ -992,18 +1005,13 @@
     htpBtn.setAttribute('aria-expanded', open);
   });
 
-  // ── Fullscreen ──
+  // ── Glass modal fullscreen ──
   document.getElementById('btn-fs').addEventListener('click', () => {
-    const el = document.getElementById('cabinet-screen');
-    if (!document.fullscreenElement) {
-      el.requestFullscreen && el.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen && document.exitFullscreen();
-    }
+    document.body.classList.toggle('glass-fs');
   });
 
   document.getElementById('btn-close-fs').addEventListener('click', () => {
-    document.exitFullscreen && document.exitFullscreen();
+    document.body.classList.remove('glass-fs');
   });
 
   // ── Notify (stub) ──

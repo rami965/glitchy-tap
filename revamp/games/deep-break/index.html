@@ -365,21 +365,30 @@
       display: block;
     }
 
-    /* Center the game when in fullscreen */
-    .portal-screen:-webkit-full-screen {
+    /* ── Glass modal fullscreen ── */
+    body.glass-fs { overflow: hidden; }
+
+    body.glass-fs .portal-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #050d1a;
+      background: rgba(2, 8, 22, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 0;
+      max-height: none;
       overflow: auto;
     }
 
-    .portal-screen:fullscreen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #050d1a;
-      overflow: auto;
+    body.glass-fs .portal-screen iframe {
+      border-radius: 12px;
+      box-shadow:
+        0 0 0 1px rgba(0,212,255,.18),
+        0 0 50px rgba(0,212,255,.14),
+        0 40px 100px rgba(0,0,0,.6);
     }
 
     /* Portal chrome bar */
@@ -743,8 +752,7 @@
       cursor: pointer;
       transition: border-color .2s, background .2s;
     }
-    .portal-screen:-webkit-full-screen .fs-close { display: flex; }
-    .portal-screen:fullscreen .fs-close { display: flex; }
+    body.glass-fs .fs-close { display: flex; }
     .fs-close:hover { border-color: rgba(255,255,255,.45); background: rgba(2,8,16,.96); }
 
     @media (max-width: 600px) {
@@ -980,18 +988,13 @@
       htpBtn.setAttribute('aria-expanded', open);
     });
 
-    // Fullscreen toggle
+    // Glass modal fullscreen
     document.getElementById('btn-fs').addEventListener('click', () => {
-      const el = document.getElementById('portal-screen');
-      if (!document.fullscreenElement) {
-        el.requestFullscreen && el.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen && document.exitFullscreen();
-      }
+      document.body.classList.toggle('glass-fs');
     });
 
     document.getElementById('btn-close-fs').addEventListener('click', () => {
-      document.exitFullscreen && document.exitFullscreen();
+      document.body.classList.remove('glass-fs');
     });
   </script>
 
