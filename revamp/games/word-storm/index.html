@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Storm — Spell Fast, Score Big | GlitchyTap</title>
+  <meta name="description" content="Word Storm is a neon word-building game where letters rain from the sky. Tap, spell, and submit before the storm overwhelms you. Play the web version now." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --game-bg-dark:  #050714;
+      --game-bg-light: #0a0e2a;
+      --game-primary:  #00e5ff;
+      --game-sec:      #b84fff;
+      --game-accent:   #ffd700;
+      --game-green:    #00ffb3;
+      --game-orange:   #ff8c00;
+      --game-pink:     #ff4fa3;
+      --game-text:     #ffffff;
+      --game-muted:    #5a6a9a;
+      --game-surface:  #0d1230;
+      --game-border:   #1a2245;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--game-bg-dark);
+      color: var(--game-text);
+      font-family: 'Exo 2', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ════════════════════════════════
+       ZONE 1 — HERO
+    ════════════════════════════════ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 8rem;
+      overflow: hidden;
+    }
+
+    /* Ambient glow background */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0,80,180,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 35% at 30% 30%, rgba(184,79,255,.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Falling letter tiles — JS-populated */
+    .hero-rain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .rain-tile {
+      position: absolute;
+      top: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: rgba(0,0,0,.8);
+      opacity: 0;
+      animation: rain-fall linear infinite;
+    }
+
+    @keyframes rain-fall {
+      0%   { transform: translateY(-60px); opacity: 0; }
+      8%   { opacity: .65; }
+      88%  { opacity: .45; }
+      100% { transform: translateY(110vh); opacity: 0; }
+    }
+
+    /* Hero content */
+    .hero-content { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--game-primary);
+      opacity: .8;
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(3.5rem, 13vw, 8.5rem);
+      font-weight: 900;
+      line-height: .95;
+      letter-spacing: -2px;
+      color: var(--game-text);
+      text-shadow: 0 0 45px rgba(0,229,255,.45), 0 0 90px rgba(0,229,255,.18);
+      margin-bottom: .6rem;
+    }
+
+    h1 .gradient-word {
+      display: block;
+      background: linear-gradient(90deg, var(--game-primary) 0%, var(--game-sec) 30%, var(--game-green) 55%, var(--game-orange) 75%, var(--game-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--game-sec);
+      margin-bottom: 2rem;
+    }
+
+    .hero-tagline {
+      font-size: clamp(.95rem, 2vw, 1.15rem);
+      font-weight: 300;
+      color: var(--game-muted);
+      line-height: 1.75;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-tagline em { color: var(--game-primary); font-style: normal; }
+
+    /* Badges */
+    .hero-badges {
+      display: flex;
+      gap: .75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.75rem;
+    }
+
+    .hero-badge {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: .4rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+
+    .badge-web { color: var(--game-primary); border-color: rgba(0,229,255,.35); }
+    .badge-dev { color: var(--game-sec); border-color: rgba(184,79,255,.35); }
+
+    /* Play CTA */
+    .btn-play {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .9rem 2.4rem;
+      background: var(--game-primary);
+      color: #000;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: .4px;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 0 28px rgba(0,229,255,.5);
+      transition: box-shadow .3s, transform .2s;
+    }
+
+    .btn-play:hover {
+      box-shadow: 0 0 55px rgba(0,229,255,.85);
+      transform: translateY(-2px);
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'Exo 2', sans-serif;
+      font-size: .5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--game-muted);
+      opacity: .45;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 34px;
+      background: linear-gradient(to bottom, var(--game-muted), transparent);
+      animation: s-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes s-pulse { 0%,100% { opacity:.3; } 50% { opacity:.9; } }
+
+    /* ════════════════════════════════
+       ZONE 2 — EMBED STAGE
+    ════════════════════════════════ */
+    .embed-zone {
+      background: var(--game-bg-light);
+      padding: 5rem 2rem 6rem;
+      position: relative;
+    }
+
+    .embed-zone::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--game-primary), var(--game-sec), transparent);
+    }
+
+    .zone-label {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--game-muted);
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    /* Cabinet / device frame */
+    .cabinet {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .cabinet-frame {
+      background: linear-gradient(145deg, #141830, #0d1230);
+      border: 2px solid var(--game-primary);
+      border-radius: 26px;
+      padding: 24px 18px 18px;
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,.08),
+        0 0 50px rgba(0,229,255,.18),
+        0 0 100px rgba(0,229,255,.06),
+        inset 0 0 30px rgba(0,229,255,.03);
+      position: relative;
+    }
+
+    /* Cabinet label */
+    .cabinet-frame::before {
+      content: '● WORD STORM';
+      position: absolute;
+      top: 9px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: .45rem;
+      letter-spacing: 3px;
+      color: var(--game-primary);
+      opacity: .55;
+      white-space: nowrap;
+    }
+
+    /* Screen — matches game aspect ratio 400:680 */
+    .cabinet-screen {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 400 / 680;
+      max-height: 68vh;
+      position: relative;
+    }
+
+    .cabinet-screen iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Cabinet chrome bar */
+    .cabinet-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding: 0 4px;
+    }
+
+    .cabinet-dots { display: flex; gap: 5px; }
+    .cabinet-dots span {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--game-primary);
+      opacity: .35;
+    }
+
+    .btn-fs {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--game-primary);
+      background: rgba(0,229,255,.07);
+      border: 1px solid rgba(0,229,255,.18);
+      padding: .3rem .85rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s;
+    }
+
+    .btn-fs:hover {
+      background: rgba(0,229,255,.14);
+      box-shadow: 0 0 10px rgba(0,229,255,.2);
+    }
+
+    /* How to Play */
+    .how-to-play {
+      max-width: 440px;
+      margin: 1.5rem auto 0;
+      border: 1px solid var(--game-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .htp-btn {
+      width: 100%;
+      background: var(--game-surface);
+      border: none;
+      padding: .9rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: var(--game-text);
+      font-family: 'Exo 2', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      transition: background .2s;
+    }
+
+    .htp-btn:hover { background: #121835; }
+
+    .htp-chevron {
+      color: var(--game-primary);
+      font-size: .7rem;
+      transition: transform .3s;
+    }
+
+    .htp-btn[aria-expanded="true"] .htp-chevron { transform: rotate(180deg); }
+
+    .htp-body {
+      background: var(--game-surface);
+      border-top: 1px solid var(--game-border);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s ease, padding .3s;
+    }
+
+    .htp-body.open { max-height: 500px; padding: 1.25rem; }
+
+    .htp-list { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+
+    .htp-list li {
+      font-size: .82rem;
+      color: var(--game-muted);
+      line-height: 1.55;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+
+    .htp-list li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--game-primary);
+      font-weight: 700;
+    }
+
+    /* ════════════════════════════════
+       ZONE 3 — INFO PANEL
+    ════════════════════════════════ */
+    .info-zone {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem 6rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem 4rem;
+    }
+
+    @media (max-width: 740px) { .info-grid { grid-template-columns: 1fr; } }
+
+    .info-eyebrow {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--game-sec);
+      margin-bottom: 1.25rem;
+    }
+
+    .info-zone h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+
+    .info-zone p {
+      font-size: .88rem;
+      font-weight: 300;
+      color: var(--game-muted);
+      line-height: 1.78;
+      margin-bottom: .9rem;
+    }
+
+    /* Features list */
+    .feat-list { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+
+    .feat-list li {
+      font-size: .85rem;
+      color: var(--game-muted);
+      line-height: 1.5;
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+    }
+
+    .feat-list li::before {
+      content: '▸';
+      color: var(--game-primary);
+      flex-shrink: 0;
+      margin-top: .06rem;
+    }
+
+    /* Status chip */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      font-family: 'Exo 2', sans-serif;
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: .4rem 1rem;
+      border-radius: 999px;
+      margin-top: 1.5rem;
+      color: var(--game-sec);
+      border: 1px solid rgba(184,79,255,.4);
+      background: rgba(184,79,255,.07);
+    }
+
+    .chip-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--game-sec);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.15; } }
+
+    /* Scoring grid */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin-top: 1rem;
+    }
+
+    .score-card {
+      background: var(--game-surface);
+      border: 1px solid var(--game-border);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+    }
+
+    .score-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .65rem;
+      color: var(--game-primary);
+      margin-bottom: .3rem;
+    }
+
+    .score-value {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--game-text);
+    }
+
+    /* Screenshots */
+    .screenshots { grid-column: 1 / -1; }
+
+    .ss-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .ss-slot {
+      aspect-ratio: 9/16;
+      background: var(--game-surface);
+      border: 1px dashed var(--game-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      color: var(--game-muted);
+    }
+
+    .ss-slot .ss-icon { font-size: 1.5rem; opacity: .3; }
+    .ss-slot span {
+      font-family: 'Exo 2', sans-serif;
+      font-size: .58rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Notify form */
+    .notify-wrap { grid-column: 1 / -1; }
+
+    .notify-card {
+      background: var(--game-surface);
+      border: 1px solid var(--game-border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+
+    .notify-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: .75rem;
+    }
+
+    .notify-card p {
+      font-size: .85rem;
+      color: var(--game-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .notify-row {
+      display: flex;
+      gap: .5rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .notify-input {
+      flex: 1;
+      background: var(--game-bg-dark);
+      border: 1px solid var(--game-border);
+      border-radius: 7px;
+      padding: .7rem 1rem;
+      color: var(--game-text);
+      font-family: 'Exo 2', sans-serif;
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .notify-input:focus { border-color: rgba(0,229,255,.45); }
+
+    .notify-submit {
+      background: var(--game-primary);
+      color: #000;
+      border: none;
+      border-radius: 7px;
+      padding: .7rem 1.5rem;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: box-shadow .2s;
+    }
+
+    .notify-submit:hover { box-shadow: 0 0 18px rgba(0,229,255,.5); }
+
+    /* ── Footer ── */
+    .site-footer {
+      border-top: 1px solid var(--game-border);
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--game-muted);
+      text-decoration: none;
+    }
+
+    .footer-nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .footer-nav a { font-size: .78rem; color: var(--game-muted); text-decoration: none; transition: color .2s; }
+    .footer-nav a:hover { color: var(--game-text); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ZONE 1 — HERO / IDENTITY
+══════════════════════════════════════════ -->
+<section class="hero" id="top">
+
+  <!-- Falling neon letter tiles — populated by JS -->
+  <div class="hero-rain" id="hero-rain" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">GlitchyTap · Word Game</p>
+
+    <h1>
+      WORD<br>
+      <span class="gradient-word">STORM</span>
+    </h1>
+
+    <p class="hero-sub">Fast-Paced · Puzzle · Word Builder</p>
+
+    <p class="hero-tagline">
+      Letters rain from the sky in five neon columns.<br>
+      Tap, spell, <em>submit</em> — before the storm swallows you whole.
+    </p>
+
+    <div class="hero-badges">
+      <span class="hero-badge badge-web">Web Version</span>
+      <span class="hero-badge badge-dev">In Development</span>
+    </div>
+
+    <a class="btn-play" href="#play">▶ &nbsp;Play Now</a>
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="scroll-line"></div>
+    <span>Spell Down</span>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ZONE 2 — EMBED STAGE
+══════════════════════════════════════════ -->
+<section class="embed-zone" id="play">
+  <p class="zone-label">// Play the web version</p>
+
+  <div class="cabinet">
+    <!-- Game cabinet frame -->
+    <div class="cabinet-frame">
+      <div class="cabinet-screen" id="cabinet-screen">
+        <iframe
+          src="./word-storm.html"
+          sandbox="allow-scripts allow-same-origin"
+          scrolling="no"
+          title="Word Storm — web version"
+          loading="lazy">
+        </iframe>
+      </div>
+
+      <div class="cabinet-bar">
+        <div class="cabinet-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <button class="btn-fs" id="btn-fs" aria-label="Toggle fullscreen">⛶ &nbsp;FULLSCREEN</button>
+      </div>
+    </div>
+
+    <!-- How to Play strip -->
+    <div class="how-to-play">
+      <button class="htp-btn" id="htp-btn" aria-expanded="false" aria-controls="htp-body">
+        <span>How to Play</span>
+        <span class="htp-chevron">▼</span>
+      </button>
+      <div class="htp-body" id="htp-body" role="region" aria-labelledby="htp-btn">
+        <ul class="htp-list">
+          <li>Tap a falling neon tile to grab it and add it to your word tray at the bottom</li>
+          <li>Spell valid English words using 3 or more selected letters</li>
+          <li>Press <strong>SUBMIT</strong> — valid words burst into particles and score points</li>
+          <li>Press <strong>CLEAR</strong> to return all selected letters back to the field</li>
+          <li>If any column stacks 5 letters it triggers the danger zone — you lose a life</li>
+          <li>You have 3 lives; each life lost clears the board so you can recover</li>
+          <li>Chain valid words back-to-back for combo multipliers: 1.5× · 2× · 3× max</li>
+          <li>Speed increases every 30 seconds — the longer you survive, the harder it gets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ZONE 3 — GAME INFO PANEL
+══════════════════════════════════════════ -->
+<section class="info-zone">
+  <div class="info-grid">
+
+    <!-- About -->
+    <div>
+      <p class="info-eyebrow">// About the game</p>
+      <h2>What is Word Storm?</h2>
+      <p>Word Storm is a fast-paced mobile word-building game where letters rain down in five glowing columns. You tap individual falling tiles to add them to your word tray, then race to spell valid English words before the columns overflow.</p>
+      <p>The core loop is instantly intuitive but rewards depth — a sharp player manages multiple columns simultaneously, hunts for 5- and 6-letter words for maximum points, and keeps their combo chain alive even as the storm intensifies every 30 seconds.</p>
+      <p>Built as a self-contained web proof-of-concept, Word Storm is heading to Android with haptic feedback, a full progression system, and richer visual effects.</p>
+      <div class="status-chip">
+        <div class="chip-dot"></div>
+        In Development
+      </div>
+    </div>
+
+    <!-- Key features -->
+    <div>
+      <p class="info-eyebrow">// Key features</p>
+      <h2>What to Expect</h2>
+      <ul class="feat-list">
+        <li>Five neon columns, each a distinct color — cyan, purple, teal, orange, pink</li>
+        <li>Built-in dictionary of 650+ common English words (3–7 letters)</li>
+        <li>Scrabble-weighted letter pool — rare letters (Q, Z, X) spawn sparingly, Q always followed by U</li>
+        <li>Combo multiplier system — chain valid words for 1.5× · 2× · 3× bonus points</li>
+        <li>3-life system: columns overflowing cost a life and clear the board</li>
+        <li>Speed ramps up every 30 seconds — intensity escalates naturally</li>
+        <li>Particle burst effects on every valid word submission</li>
+        <li>Best score saved in localStorage across browser sessions</li>
+      </ul>
+    </div>
+
+    <!-- Scoring -->
+    <div>
+      <p class="info-eyebrow">// Scoring system</p>
+      <h2>Points Breakdown</h2>
+      <div class="score-grid">
+        <div class="score-card">
+          <div class="score-label">3 letters</div>
+          <div class="score-value">10 pts</div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">4 letters</div>
+          <div class="score-value">25 pts</div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">5 letters</div>
+          <div class="score-value">50 pts</div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">6+ letters</div>
+          <div class="score-value">100 pts</div>
+        </div>
+      </div>
+      <p style="margin-top:1rem;font-size:.78rem;">Combo multipliers stack on consecutive valid words: 1.5× · 2× · 3× (max).</p>
+    </div>
+
+    <!-- Platform status -->
+    <div>
+      <p class="info-eyebrow">// Platform availability</p>
+      <h2>Where to Play</h2>
+      <p>The web version is fully playable right here in your browser — no download, no account, no install required. It runs entirely in a single HTML file.</p>
+      <p>The Android version is in development and will bring mobile-native haptics, a global leaderboard, and expanded word packs. Leave your email below to be notified at launch.</p>
+    </div>
+
+    <!-- Screenshots -->
+    <div class="screenshots">
+      <p class="info-eyebrow">// In-game visuals</p>
+      <h2>Screenshots</h2>
+      <div class="ss-grid">
+        <div class="ss-slot"><div class="ss-icon">🌩</div><span>Coming Soon</span></div>
+        <div class="ss-slot"><div class="ss-icon">🌩</div><span>Coming Soon</span></div>
+        <div class="ss-slot"><div class="ss-icon">🌩</div><span>Coming Soon</span></div>
+        <div class="ss-slot"><div class="ss-icon">🌩</div><span>Coming Soon</span></div>
+      </div>
+    </div>
+
+    <!-- Notify form -->
+    <div class="notify-wrap">
+      <div class="notify-card">
+        <h3>Coming to Android</h3>
+        <p>Word Storm is heading to Google Play. Drop your email and we'll let you know the moment it launches.</p>
+        <div class="notify-row">
+          <input class="notify-input" type="email" placeholder="your@email.com" aria-label="Email address" />
+          <button class="notify-submit" type="button" id="notify-btn">Notify Me</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <a class="footer-brand" href="../../">GlitchyTap</a>
+  <nav class="footer-nav">
+    <a href="../../">← All Games</a>
+    <a href="../../../">Main Site</a>
+  </nav>
+</footer>
+
+
+<script>
+  // ── Falling letter tiles in hero ──
+  const COLORS  = ['#00e5ff','#b84fff','#00ffb3','#ff8c00','#ff4fa3'];
+  const LETTERS  = 'STORMWORDSPEAKLIFTBEND'.split('');
+  const rain     = document.getElementById('hero-rain');
+
+  for (let i = 0; i < 22; i++) {
+    const tile = document.createElement('div');
+    tile.className = 'rain-tile';
+    const col  = i % 5;
+    const left = col * 20 + (i % 3 === 0 ? 2 : 8);
+    tile.style.cssText = `
+      left: ${left}%;
+      background: ${COLORS[col]};
+      animation-duration: ${(5 + (i * 0.37) % 5).toFixed(1)}s;
+      animation-delay: -${(i * 0.7 % 8).toFixed(1)}s;
+    `;
+    tile.textContent = LETTERS[i % LETTERS.length];
+    rain.appendChild(tile);
+  }
+
+  // ── How to Play ──
+  const htpBtn  = document.getElementById('htp-btn');
+  const htpBody = document.getElementById('htp-body');
+
+  htpBtn.addEventListener('click', () => {
+    const open = htpBody.classList.toggle('open');
+    htpBtn.setAttribute('aria-expanded', open);
+  });
+
+  // ── Fullscreen ──
+  document.getElementById('btn-fs').addEventListener('click', () => {
+    const el = document.getElementById('cabinet-screen');
+    if (!document.fullscreenElement) {
+      el.requestFullscreen && el.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  });
+
+  // ── Notify (stub) ──
+  document.getElementById('notify-btn').addEventListener('click', () => {
+    const inp = document.querySelector('.notify-input');
+    if (inp.value && inp.value.includes('@')) {
+      inp.value = '';
+      inp.placeholder = "You're on the list — we'll be in touch!";
+      inp.disabled = true;
+      document.getElementById('notify-btn').textContent = 'Done ✓';
+    }
+  });
+</script>
+
+</body>
+</html>
