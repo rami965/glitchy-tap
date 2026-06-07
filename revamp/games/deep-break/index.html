@@ -316,9 +316,9 @@
       margin-bottom: 3rem;
     }
 
-    /* Game portal — visual cabinet for Deep Break */
+    /* Game portal — wide cabinet for Deep Break (580px game) */
     .game-portal {
-      max-width: 440px;
+      max-width: 680px;
       margin: 0 auto;
     }
 
@@ -326,7 +326,7 @@
       background: linear-gradient(145deg, #0a1f35, #051018);
       border: 2px solid var(--game-primary);
       border-radius: 20px;
-      padding: 20px 18px 18px;
+      padding: 24px 18px 18px;
       box-shadow:
         0 0 0 1px rgba(0,212,255,.07),
         0 0 50px rgba(0,212,255,.2),
@@ -337,9 +337,9 @@
 
     /* Cabinet label */
     .portal-frame::before {
-      content: '● DEEP BREAK';
+      content: '● DEEP BREAK — BIOLUMINESCENT EDITION';
       position: absolute;
-      top: 8px; left: 50%;
+      top: 9px; left: 50%;
       transform: translateX(-50%);
       font-family: 'Space Mono', monospace;
       font-size: .42rem;
@@ -349,144 +349,23 @@
       white-space: nowrap;
     }
 
-    /* Ocean scene - CSS art preview */
+    /* Screen — scrollable so the 580px game fits on all viewports */
     .portal-screen {
-      aspect-ratio: 9/16;
-      max-height: 65vh;
       border-radius: 10px;
-      background:
-        radial-gradient(ellipse 55% 55% at 55% 40%, rgba(0,140,200,.3) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 30% at 25% 70%, rgba(123,47,255,.2) 0%, transparent 55%),
-        linear-gradient(180deg, #020810 0%, #041525 60%, #061e35 100%);
-      overflow: hidden;
+      overflow: auto;
+      background: #050d1a;
+      max-height: 75vh;
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    /* Brick grid (CSS art) */
-    .portal-screen::before {
-      content: '';
-      position: absolute;
-      top: 10%;
-      left: 10%;
-      right: 10%;
-      height: 45%;
-      background-image:
-        repeating-linear-gradient(90deg, transparent 0px, transparent 30px, rgba(0,212,255,.12) 30px, rgba(0,212,255,.12) 32px),
-        repeating-linear-gradient(0deg, transparent 0px, transparent 16px, rgba(0,212,255,.12) 16px, rgba(0,212,255,.12) 18px);
-      border-radius: 4px;
+    .portal-screen iframe {
+      width: 600px;
+      height: 730px;
+      border: none;
+      display: block;
     }
 
-    /* Glow blocks */
-    .portal-screen::after {
-      content: '';
-      position: absolute;
-      top: 12%;
-      left: 15%;
-      right: 15%;
-      height: 42%;
-      background:
-        radial-gradient(ellipse 30% 8% at 25% 15%, rgba(0,212,255,.5) 0%, transparent 70%),
-        radial-gradient(ellipse 25% 8% at 60% 35%, rgba(57,255,132,.45) 0%, transparent 70%),
-        radial-gradient(ellipse 20% 8% at 80% 55%, rgba(123,47,255,.5) 0%, transparent 70%),
-        radial-gradient(ellipse 28% 8% at 40% 70%, rgba(0,212,255,.3) 0%, transparent 70%);
-      border-radius: 4px;
-    }
-
-    /* Paddle & ball */
-    .portal-paddle {
-      position: absolute;
-      bottom: 18%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70px;
-      height: 10px;
-      border-radius: 5px;
-      background: linear-gradient(90deg, transparent 0%, var(--game-primary) 30%, #b8f0ff 50%, var(--game-primary) 70%, transparent 100%);
-      box-shadow: 0 0 10px rgba(0,212,255,.7);
-    }
-
-    .portal-ball {
-      position: absolute;
-      bottom: calc(18% + 24px);
-      left: 48%;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #b8f0ff, #00d4ff 45%, #005090);
-      box-shadow: 0 0 10px rgba(0,212,255,.85);
-      animation: ball-bounce 2.2s ease-in-out infinite alternate;
-    }
-
-    @keyframes ball-bounce {
-      from { transform: translateY(0) translateX(0); }
-      to   { transform: translateY(-80px) translateX(30px); }
-    }
-
-    /* Play overlay */
-    .portal-play-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(2,8,16,.55);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.25rem;
-      backdrop-filter: blur(2px);
-      border-radius: 10px;
-      transition: opacity .3s;
-    }
-
-    .portal-play-overlay p {
-      font-family: 'Space Mono', monospace;
-      font-size: .58rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--game-muted);
-      text-align: center;
-    }
-
-    .btn-launch-itch {
-      display: inline-flex;
-      align-items: center;
-      gap: .65rem;
-      padding: .85rem 2rem;
-      background: var(--game-primary);
-      color: #020d18;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 700;
-      font-size: .9rem;
-      border-radius: 6px;
-      text-decoration: none;
-      letter-spacing: .3px;
-      box-shadow: 0 0 22px rgba(0,212,255,.5);
-      transition: box-shadow .3s, transform .2s;
-    }
-
-    .btn-launch-itch:hover {
-      box-shadow: 0 0 45px rgba(0,212,255,.8);
-      transform: translateY(-2px);
-    }
-
-    .btn-launch-play {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .78rem;
-      color: var(--game-muted);
-      text-decoration: none;
-      border-bottom: 1px solid transparent;
-      transition: color .2s, border-color .2s;
-      padding-bottom: 1px;
-    }
-
-    .btn-launch-play:hover { color: var(--game-accent); border-color: var(--game-accent); }
-
-    /* Portal chrome */
+    /* Portal chrome bar */
     .portal-bar {
       display: flex;
       align-items: center;
@@ -503,18 +382,29 @@
       opacity: .3;
     }
 
-    .portal-status {
+    .btn-fs {
       font-family: 'Space Mono', monospace;
-      font-size: .45rem;
+      font-size: .48rem;
+      font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--game-accent);
-      opacity: .7;
+      color: var(--game-primary);
+      background: rgba(0,212,255,.07);
+      border: 1px solid rgba(0,212,255,.18);
+      padding: .3rem .85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s;
+    }
+
+    .btn-fs:hover {
+      background: rgba(0,212,255,.14);
+      box-shadow: 0 0 10px rgba(0,212,255,.2);
     }
 
     /* How to Play */
     .how-to-play {
-      max-width: 440px;
+      max-width: 680px;
       margin: 1.5rem auto 0;
       border: 1px solid var(--game-border);
       border-radius: 12px;
@@ -857,30 +747,19 @@
 
     <div class="game-portal">
       <div class="portal-frame">
-        <div class="portal-screen">
-          <!-- CSS ocean art preview -->
-          <div class="portal-paddle"></div>
-          <div class="portal-ball"></div>
-
-          <!-- Launch overlay -->
-          <div class="portal-play-overlay">
-            <p>Playable on itch.io<br>opens in a new tab</p>
-            <a class="btn-launch-itch"
-               href="https://melhelbawy.itch.io/deep-break-bioluminescent-edition"
-               target="_blank" rel="noopener noreferrer">
-              ▶ &nbsp;Play Now — Free
-            </a>
-            <a class="btn-launch-play"
-               href="https://play.google.com/store/apps/details?id=com.glitchytap.deepbreak"
-               target="_blank" rel="noopener noreferrer">
-              Download on Android ↗
-            </a>
-          </div>
+        <div class="portal-screen" id="portal-screen">
+          <iframe
+            src="./deep-break.html"
+            sandbox="allow-scripts allow-same-origin"
+            scrolling="no"
+            title="Deep Break — Bioluminescent Edition — web version"
+            loading="lazy">
+          </iframe>
         </div>
 
         <div class="portal-bar">
           <div class="portal-dots"><span></span><span></span><span></span></div>
-          <span class="portal-status">Live on Android</span>
+          <button class="btn-fs" id="btn-fs" aria-label="Toggle fullscreen">⛶ &nbsp;FULLSCREEN</button>
         </div>
       </div>
 
@@ -984,13 +863,13 @@
       <div class="also-on">
         <p class="info-eyebrow">// Also available on</p>
         <h2>Play Anywhere</h2>
-        <p>The web version runs entirely in your browser — no download needed. Full gameplay, same experience.</p>
+        <p>The web version is embedded directly above — no download needed. Full gameplay, same experience. Also available on itch.io.</p>
         <a class="platform-link"
            href="https://melhelbawy.itch.io/deep-break-bioluminescent-edition"
            target="_blank" rel="noopener noreferrer">
           <span>itch.io</span>
           <span style="opacity:.4;">—</span>
-          <span>Free browser version</span>
+          <span>Also playable there</span>
         </a>
       </div>
 
@@ -1017,6 +896,16 @@
     htpBtn.addEventListener('click', () => {
       const open = htpBody.classList.toggle('open');
       htpBtn.setAttribute('aria-expanded', open);
+    });
+
+    // Fullscreen toggle
+    document.getElementById('btn-fs').addEventListener('click', () => {
+      const el = document.getElementById('portal-screen');
+      if (!document.fullscreenElement) {
+        el.requestFullscreen && el.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen && document.exitFullscreen();
+      }
     });
   </script>
 

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Break — Bioluminescent Edition</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#050d1a; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; font-family:'Courier New',monospace; }
+
+#shell {
+  display:flex; flex-direction:column; align-items:center;
+  padding:14px 0 20px; width:580px;
+}
+
+/* ── TOP BAR: stats row ───────────────────────────────────── */
+#topBar {
+  width:560px; display:grid; grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:6px; margin-bottom:6px;
+}
+.stat-card {
+  background:#060f1e; border:1px solid #0d3d3a; border-radius:4px;
+  padding:5px 10px; display:flex; flex-direction:column; align-items:center;
+}
+.stat-label { font-size:9px; letter-spacing:2px; color:#2a6a60; text-transform:uppercase; margin-bottom:2px; }
+.stat-val   { font-size:16px; font-weight:bold; color:#5ee8d0; letter-spacing:1px; line-height:1; }
+.stat-val.lives { font-size:12px; letter-spacing:3px; }
+.stat-sub   { font-size:9px; color:#1a4a48; letter-spacing:1px; margin-top:2px; }
+
+/* ── MIDDLE ROW: controls left + canvas + skins right ──────── */
+#midRow {
+  display:flex; gap:6px; align-items:flex-start; width:560px;
+}
+
+/* Left panel */
+#leftPanel {
+  width:60px; display:flex; flex-direction:column; gap:6px; padding-top:0;
+  flex-shrink:0;
+}
+.panel-card {
+  background:#060f1e; border:1px solid #0d3d3a; border-radius:4px;
+  padding:8px 6px; display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.panel-label { font-size:8px; letter-spacing:2px; color:#1a5a58; text-transform:uppercase; }
+
+/* Mute button */
+#muteBtn {
+  background:transparent; border:1px solid #0d3d3a; color:#5ee8d0;
+  width:32px; height:28px; cursor:pointer; font-size:14px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center; padding:0;
+  transition:border-color .2s;
+}
+#muteBtn:hover { border-color:#5ee8d0; }
+#muteBtn.muted { color:#2a4040; border-color:#0a2828; }
+
+/* Vertical volume slider */
+#volSlider {
+  -webkit-appearance:none; appearance:none;
+  writing-mode:vertical-lr; direction:rtl;
+  width:4px; height:70px; border-radius:2px; cursor:pointer; border:none; outline:none;
+  background:linear-gradient(to top, #00ffcc var(--val,70%), #0d3d3a var(--val,70%));
+}
+#volSlider::-webkit-slider-thumb {
+  -webkit-appearance:none; width:13px; height:13px;
+  border-radius:50%; background:#00ffcc; cursor:pointer;
+}
+#volSlider::-moz-range-thumb {
+  width:13px; height:13px; border-radius:50%; background:#00ffcc; cursor:pointer; border:none;
+}
+#volNum { font-size:9px; color:#3a8a80; letter-spacing:1px; }
+
+/* Skin dots in left panel */
+.skin-dot {
+  width:20px; height:20px; border-radius:50%; cursor:pointer;
+  border:2px solid transparent; transition:border-color .2s, opacity .2s;
+  display:block;
+}
+.skin-dot.active { border-color:#5ee8d0; }
+
+/* Canvas */
+canvas {
+  border:1px solid #0d3d3a; border-radius:4px; display:block;
+  cursor:none; box-shadow:0 0 40px #00ffcc18, 0 0 1px #00ffcc22;
+  flex-shrink:0;
+}
+
+/* Right panel */
+#rightPanel {
+  width:60px; display:flex; flex-direction:column; gap:6px;
+  flex-shrink:0;
+}
+.hint-line {
+  font-size:8px; color:#1a4040; letter-spacing:1px; text-transform:uppercase;
+  writing-mode:vertical-rl; text-orientation:mixed; line-height:1.4;
+  padding:4px 0; text-align:center;
+}
+
+/* Daily card in right panel */
+#dailyCard {
+  background:#060f1e; border:1px solid #1a3a00; border-radius:4px;
+  padding:6px 4px; display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+#dailyCard .panel-label { color:#664400; }
+#dailyIcon { font-size:16px; }
+#dailyStatus { font-size:8px; color:#ffaa0088; letter-spacing:1px; text-align:center; }
+
+/* Power-up bar above canvas bottom */
+#pwrBar {
+  width:560px; min-height:18px; display:flex; gap:6px;
+  margin-top:5px; align-items:center; flex-wrap:wrap;
+}
+.pwr-tag {
+  font-size:9px; letter-spacing:1px; padding:2px 8px;
+  border-radius:2px; text-transform:uppercase;
+}
+.pwr-wide  { background:#003d5040; color:#00aaff; border:1px solid #00aaff44; }
+.pwr-slow  { background:#2d005040; color:#cc00ff; border:1px solid #cc00ff44; }
+.pwr-multi { background:#003a1a40; color:#00ff88; border:1px solid #00ff8844; }
+
+/* ── BOTTOM: msg + buttons ──────────────────────────────────── */
+#bottomRow {
+  width:560px; display:flex; align-items:center; justify-content:space-between;
+  margin-top:8px; min-height:32px;
+}
+#msg {
+  color:#5ee8d0; font-size:11px; letter-spacing:2px;
+  text-transform:uppercase; flex:1; text-align:center;
+}
+.action-btn {
+  background:transparent; border:1px solid #5ee8d0; color:#5ee8d0;
+  padding:6px 16px; font-family:'Courier New',monospace; font-size:10px;
+  letter-spacing:2px; cursor:pointer; text-transform:uppercase;
+  border-radius:2px; transition:background .2s; white-space:nowrap;
+}
+.action-btn:hover { background:#5ee8d030; }
+.action-btn.daily-btn { border-color:#ffaa00; color:#ffaa00; }
+.action-btn.daily-btn:hover { background:#ffaa0018; }
+
+/* ── ACHIEVEMENTS ───────────────────────────────────────────── */
+#achPanel {
+  width:560px; margin-top:10px;
+  border-top:1px solid #0a2020; padding-top:10px;
+}
+#achHeader {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:8px;
+}
+#achTitle { color:#1a5a58; font-size:9px; letter-spacing:3px; text-transform:uppercase; }
+#achCount { color:#3a8a80; font-size:9px; letter-spacing:1px; }
+#achGrid {
+  display:grid; grid-template-columns:repeat(8,1fr); gap:5px;
+}
+.ach-badge {
+  background:#060f1e; border:1px solid #0a2020; border-radius:4px;
+  padding:5px 3px; text-align:center; transition:border-color .3s;
+  cursor:default;
+}
+.ach-badge.unlocked { border-color:#00ffcc33; background:#030d18; }
+.ach-icon { font-size:16px; display:block; filter:grayscale(1) opacity(.2); transition:filter .3s; }
+.ach-badge.unlocked .ach-icon { filter:none; }
+.ach-name { font-size:7px; color:#1a3a38; letter-spacing:0.5px; margin-top:2px; display:block; text-transform:uppercase; line-height:1.2; }
+.ach-badge.unlocked .ach-name { color:#2a7a70; }
+
+/* ── TOAST ──────────────────────────────────────────────────── */
+#toast {
+  position:fixed; top:16px; left:50%; transform:translateX(-50%);
+  background:#020c16; border:1px solid #00ffcc55; color:#5ee8d0;
+  padding:7px 18px; font-size:11px; letter-spacing:2px; border-radius:3px;
+  opacity:0; transition:opacity .3s; pointer-events:none; text-transform:uppercase;
+  white-space:nowrap; z-index:999;
+}
+#toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- TOP STAT BAR -->
+  <div id="topBar">
+    <div class="stat-card">
+      <span class="stat-label">Score</span>
+      <span class="stat-val" id="score">0</span>
+      <span class="stat-sub">BEST: <span id="bestScore">—</span></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Level</span>
+      <span class="stat-val" id="level">1</span>
+      <span class="stat-sub">TOP: <span id="bestLevel">—</span></span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Lives</span>
+      <span class="stat-val lives" id="lives">● ● ●</span>
+      <span class="stat-sub">&nbsp;</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Daily</span>
+      <span class="stat-val" style="font-size:11px;color:#ffaa00;" id="dailyShort">—</span>
+      <span class="stat-sub" id="dailySubtxt">TODAY</span>
+    </div>
+  </div>
+
+  <!-- MIDDLE ROW -->
+  <div id="midRow">
+
+    <!-- LEFT PANEL: sound -->
+    <div id="leftPanel">
+      <div class="panel-card">
+        <span class="panel-label">Sound</span>
+        <button id="muteBtn">🔊</button>
+        <input type="range" id="volSlider" min="0" max="100" value="70" step="1" orient="vertical">
+        <span id="volNum">70</span>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <canvas id="c" width="560" height="420"></canvas>
+
+    <!-- RIGHT PANEL: skins + hints -->
+    <div id="rightPanel">
+      <div class="panel-card">
+        <span class="panel-label">Ball</span>
+        <span class="skin-dot active" id="sk0" style="background:radial-gradient(circle at 35% 35%,#aaffff,#00ccff,#004466)" onclick="setSkin(0)" title="Default"></span>
+        <span class="skin-dot" id="sk1" style="background:radial-gradient(circle at 35% 35%,#fffaaa,#ffcc00,#664400)" onclick="setSkin(1)" title="Gold — 200pts"></span>
+        <span class="skin-dot" id="sk2" style="background:radial-gradient(circle at 35% 35%,#ffaaff,#cc00ff,#440066)" onclick="setSkin(2)" title="Void — 500pts"></span>
+        <span class="skin-dot" id="sk3" style="background:radial-gradient(circle at 35% 35%,#aaffaa,#00ff88,#004422)" onclick="setSkin(3)" title="Jade — 1000pts"></span>
+        <span class="panel-label" style="margin-top:2px;font-size:7px;color:#0d3030;">UNLOCK</span>
+      </div>
+      <div class="panel-card" style="gap:3px;">
+        <span class="panel-label">Keys</span>
+        <span style="font-size:8px;color:#1a4040;letter-spacing:0;">SPACE</span>
+        <span style="font-size:7px;color:#0d3030;">pause</span>
+        <span style="font-size:8px;color:#1a4040;letter-spacing:0;margin-top:4px;">CLICK</span>
+        <span style="font-size:7px;color:#0d3030;">launch</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POWER-UP BAR -->
+  <div id="pwrBar"></div>
+
+  <!-- BOTTOM ROW: msg + buttons -->
+  <div id="bottomRow">
+    <button class="action-btn" id="startBtn" onclick="startGame(false)">START DIVE</button>
+    <div id="msg">MOVE MOUSE · CLICK TO LAUNCH</div>
+    <button class="action-btn daily-btn" id="dailyBtn" onclick="startGame(true)">DAILY</button>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div id="achPanel">
+    <div id="achHeader">
+      <span id="achTitle">Achievements</span>
+      <span id="achCount">0 / 8</span>
+    </div>
+    <div id="achGrid"></div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;  // 560 x 420
+
+const PADDLE_H = 10, BALL_R = 7;
+const BLOCK_COLS = 10, BLOCK_ROWS = 5;
+const BLOCK_W = 44, BLOCK_H = 18, BLOCK_GAP = 4;
+const BLK_OX = (W - (BLOCK_COLS*(BLOCK_W+BLOCK_GAP)-BLOCK_GAP)) / 2;
+const BLK_OY = 44;
+
+const ROW_COLORS = [
+  { fill:'#003d3d', glow:'#00ffcc', hits:3 },
+  { fill:'#002d4a', glow:'#00aaff', hits:2 },
+  { fill:'#2d0050', glow:'#cc00ff', hits:2 },
+  { fill:'#003a1a', glow:'#00ff88', hits:1 },
+  { fill:'#3a1a00', glow:'#ffaa00', hits:1 },
+];
+
+// ── Skins ─────────────────────────────────────────────────────────────────────
+const SKINS = [
+  { inner:'#aaffff', mid:'#00ccff', outer:'#004466', unlockScore:0 },
+  { inner:'#fffaaa', mid:'#ffcc00', outer:'#664400', unlockScore:200 },
+  { inner:'#ffaaff', mid:'#cc00ff', outer:'#440066', unlockScore:500 },
+  { inner:'#aaffaa', mid:'#00ff88', outer:'#004422', unlockScore:1000 },
+];
+let activeSkin = 0;
+
+function setSkin(i) {
+  const save = loadSave();
+  if (SKINS[i].unlockScore > 0 && (save.bestScore||0) < SKINS[i].unlockScore) {
+    showToast('REACH ' + SKINS[i].unlockScore + ' PTS TO UNLOCK');
+    return;
+  }
+  activeSkin = i;
+  document.querySelectorAll('.skin-dot').forEach((el,j) => el.classList.toggle('active', j===i));
+}
+
+// ── Achievements ─────────────────────────────────────────────────────────────
+const ACHIEVEMENTS = [
+  { id:'first_dive',  icon:'🌊', name:'First Dive',  desc:'Complete level 1',          check: s => s.levelsCleared >= 1 },
+  { id:'deep_diver',  icon:'🐠', name:'Deep Diver',  desc:'Reach level 3',             check: s => s.levelsCleared >= 3 },
+  { id:'abyss',       icon:'🦑', name:'The Abyss',   desc:'Complete all 5 levels',     check: s => s.levelsCleared >= 5 },
+  { id:'crusher',     icon:'💥', name:'Crusher',     desc:'Destroy 50 blocks',         check: s => s.totalDestroyed >= 50 },
+  { id:'centurion',   icon:'💯', name:'Centurion',   desc:'Score 1000 points',         check: s => s.bestScore >= 1000 },
+  { id:'untouchable', icon:'🛡️', name:'No Miss',     desc:'Clear level without losing',check: s => s.perfectLevel },
+  { id:'power_user',  icon:'⚡', name:'Power User',  desc:'Collect 5 power-ups',       check: s => s.totalPowerups >= 5 },
+  { id:'daily',       icon:'📅', name:'Daily Diver', desc:'Play the daily challenge',  check: s => s.playedDaily },
+];
+
+function loadSave()      { try { return JSON.parse(localStorage.getItem('deepbreak_v4')||'{}'); } catch(e) { return {}; } }
+function writeSave(data) { try { localStorage.setItem('deepbreak_v4', JSON.stringify(data)); } catch(e) {} }
+
+function checkAchievements(stats) {
+  const save = loadSave();
+  const unlocked = save.achievements || [];
+  const newUnlocks = [];
+  ACHIEVEMENTS.forEach(a => {
+    if (!unlocked.includes(a.id) && a.check(stats)) { unlocked.push(a.id); newUnlocks.push(a); }
+  });
+  if (newUnlocks.length) {
+    save.achievements = unlocked; writeSave(save);
+    newUnlocks.forEach((a,i) => setTimeout(() => showToast('UNLOCKED: ' + a.name + ' ' + a.icon), i*1800));
+  }
+  renderAchievements();
+}
+
+function renderAchievements() {
+  const save = loadSave();
+  const unlocked = save.achievements || [];
+  const grid = document.getElementById('achGrid');
+  grid.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const d = document.createElement('div');
+    d.className = 'ach-badge' + (unlocked.includes(a.id) ? ' unlocked' : '');
+    d.title = a.desc;
+    d.innerHTML = `<span class="ach-icon">${a.icon}</span><span class="ach-name">${a.name}</span>`;
+    grid.appendChild(d);
+  });
+  document.getElementById('achCount').textContent = unlocked.length + ' / ' + ACHIEVEMENTS.length;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── Daily ──────────────────────────────────────────────────────────────────────
+function getDailyInfo() {
+  const dateStr = new Date().toISOString().slice(0,10);
+  const seed = dateStr.split('-').reduce((a,v) => a+parseInt(v), 0);
+  return { dateStr, seed };
+}
+function initDailyUI() {
+  const { dateStr } = getDailyInfo();
+  const save = loadSave();
+  const played = save.dailyDate === dateStr;
+  const parts = dateStr.slice(5); // MM-DD
+  document.getElementById('dailyShort').textContent = played ? '✓ DONE' : parts;
+  document.getElementById('dailySubtxt').textContent = played ? 'PLAYED' : 'TODAY';
+}
+
+// ── Audio ──────────────────────────────────────────────────────────────────────
+let audioCtx=null, masterGain=null, isMuted=false, currentVolume=0.7;
+function getAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = currentVolume;
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone({freq=440,freq2=null,type='sine',duration=0.12,vol=0.4,attack=0.005,decay=0.08}) {
+  if (isMuted||currentVolume===0) return;
+  try {
+    const ac=getAudio(), osc=ac.createOscillator(), g=ac.createGain();
+    osc.connect(g); g.connect(masterGain);
+    osc.type=type; osc.frequency.setValueAtTime(freq,ac.currentTime);
+    if (freq2) osc.frequency.linearRampToValueAtTime(freq2,ac.currentTime+duration);
+    g.gain.setValueAtTime(0,ac.currentTime);
+    g.gain.linearRampToValueAtTime(vol,ac.currentTime+attack);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+attack+decay);
+    osc.start(ac.currentTime); osc.stop(ac.currentTime+duration+0.05);
+  } catch(e) {}
+}
+const sndPaddle  = () => playTone({freq:280,freq2:340,type:'triangle',duration:0.1,vol:0.35,decay:0.09});
+const sndWall    = () => playTone({freq:180,type:'sine',duration:0.07,vol:0.2,decay:0.06});
+const sndBlockHit= () => playTone({freq:520,freq2:460,type:'square',duration:0.08,vol:0.25,decay:0.07});
+const sndBlockDie= () => { playTone({freq:680,freq2:320,type:'sawtooth',duration:0.18,vol:0.35,decay:0.16}); setTimeout(()=>playTone({freq:900,freq2:200,type:'triangle',duration:0.14,vol:0.2,decay:0.12}),60); };
+const sndLifeLost= () => playTone({freq:320,freq2:80,type:'sawtooth',duration:0.4,vol:0.4,decay:0.38});
+const sndLevelUp = () => [440,550,660,880].forEach((f,i)=>setTimeout(()=>playTone({freq:f,type:'triangle',duration:0.15,vol:0.3,decay:0.12}),i*80));
+const sndPause   = () => playTone({freq:300,freq2:200,type:'sine',duration:0.2,vol:0.3,decay:0.18});
+const sndResume  = () => playTone({freq:200,freq2:350,type:'sine',duration:0.2,vol:0.3,decay:0.18});
+const sndPowerup = () => { playTone({freq:600,freq2:900,type:'triangle',duration:0.25,vol:0.4,decay:0.22}); setTimeout(()=>playTone({freq:1100,type:'triangle',duration:0.15,vol:0.25,decay:0.12}),120); };
+
+// Volume UI
+const volSlider = document.getElementById('volSlider');
+const volNum    = document.getElementById('volNum');
+const muteBtn   = document.getElementById('muteBtn');
+function updateVolUI() {
+  volNum.textContent = isMuted ? '—' : Math.round(currentVolume*100);
+  muteBtn.textContent = isMuted ? '🔇' : currentVolume<0.4 ? '🔉' : '🔊';
+  muteBtn.classList.toggle('muted', isMuted);
+  volSlider.style.setProperty('--val',(isMuted?0:currentVolume*100)+'%');
+}
+volSlider.addEventListener('input', () => {
+  currentVolume=volSlider.value/100; isMuted=false;
+  if (masterGain) masterGain.gain.value=currentVolume;
+  updateVolUI();
+});
+muteBtn.addEventListener('click', () => {
+  isMuted=!isMuted;
+  if (masterGain) masterGain.gain.value=isMuted?0:currentVolume;
+  updateVolUI();
+  if (!isMuted) sndResume();
+});
+updateVolUI();
+
+// ── Game State ─────────────────────────────────────────────────────────────────
+let state = 'idle';
+let paddle, balls, blocks, score, level, lives, particles, powerups;
+let sessionStats = {};
+let ballLostThisLevel = false;
+let activePowers = { wide:0, slow:0 };
+
+function makeBlocks(lvl, seed) {
+  const b = [], rows = Math.min(3+lvl, BLOCK_ROWS);
+  for (let r=0; r<rows; r++) {
+    for (let c=0; c<BLOCK_COLS; c++) {
+      const row = ROW_COLORS[r];
+      let extraHp = (lvl>2&&r<2) ? 1 : 0;
+      if (seed && ((r*BLOCK_COLS+c+seed)%7===0)) extraHp++;
+      b.push({
+        x: BLK_OX+c*(BLOCK_W+BLOCK_GAP), y: BLK_OY+r*(BLOCK_H+BLOCK_GAP),
+        w: BLOCK_W, h: BLOCK_H,
+        hp: row.hits+extraHp, maxhp: row.hits+extraHp,
+        glow: row.glow, fill: row.fill, alive: true,
+        hasPowerup: Math.random() < 0.12
+      });
+    }
+  }
+  return b;
+}
+
+function makeBall(lvl) {
+  const speed = 3.2 + lvl*0.4;
+  return { x:W/2, y:H-70, vx:speed*(Math.random()>0.5?1:-1), vy:-speed, launched:false };
+}
+
+function initLevel(lvl, seed) {
+  balls     = [makeBall(lvl)];
+  paddle    = { x:W/2-50, y:H-30, w:100-Math.max(0,(lvl-1)*4) };
+  blocks    = makeBlocks(lvl, seed);
+  particles = []; powerups = [];
+  activePowers = { wide:0, slow:0 };
+  ballLostThisLevel = false;
+  updatePwrBar();
+}
+
+function startGame(daily) {
+  getAudio();
+  score=0; level=1; lives=3;
+  sessionStats = { levelsCleared:0, totalDestroyed:0, perfectLevel:false, totalPowerups:0, playedDaily:false };
+  document.getElementById('startBtn').style.display = 'none';
+  document.getElementById('dailyBtn').style.display = 'none';
+  document.getElementById('msg').textContent = 'CLICK TO LAUNCH';
+  let seed = null;
+  if (daily) {
+    const d = getDailyInfo();
+    seed = d.seed;
+    sessionStats.playedDaily = true;
+    const save = loadSave();
+    save.dailyDate = d.dateStr;
+    writeSave(save);
+    initDailyUI();
+  }
+  initLevel(level, seed);
+  state = 'playing';
+  updateHud();
+  renderAchievements();
+  loop();
+}
+
+function updateHud() {
+  document.getElementById('score').textContent     = score;
+  document.getElementById('level').textContent     = level;
+  document.getElementById('lives').textContent     = ['●','●','●'].slice(0,lives).join(' ') || '○';
+  const save = loadSave();
+  document.getElementById('bestScore').textContent = save.bestScore || '—';
+  document.getElementById('bestLevel').textContent = save.bestLevel || '—';
+  updateSkinLocks();
+}
+
+function updateSkinLocks() {
+  const save = loadSave();
+  SKINS.forEach((sk,i) => {
+    const el = document.getElementById('sk'+i);
+    el.style.opacity = (sk.unlockScore===0||(save.bestScore||0)>=sk.unlockScore) ? '1' : '0.22';
+  });
+}
+
+function saveBest() {
+  const save = loadSave();
+  let changed = false;
+  if (!save.bestScore||score>save.bestScore) { save.bestScore=score; changed=true; }
+  if (!save.bestLevel||level>save.bestLevel) { save.bestLevel=level; changed=true; }
+  if (changed) writeSave(save);
+}
+
+function updatePwrBar() {
+  const bar = document.getElementById('pwrBar');
+  bar.innerHTML = '';
+  if (activePowers.wide>0) bar.innerHTML += `<span class="pwr-tag pwr-wide">⬛ WIDE ${Math.ceil(activePowers.wide/60)}s</span>`;
+  if (activePowers.slow>0) bar.innerHTML += `<span class="pwr-tag pwr-slow">◎ SLOW ${Math.ceil(activePowers.slow/60)}s</span>`;
+  if (balls.length>1)      bar.innerHTML += `<span class="pwr-tag pwr-multi">◉ MULTI ×${balls.length}</span>`;
+}
+
+// ── Input ──────────────────────────────────────────────────────────────────────
+canvas.addEventListener('mousemove', e => {
+  if (state!=='playing') return;
+  const r = canvas.getBoundingClientRect();
+  const pw = activePowers.wide>0 ? Math.min(W, paddle.w+40) : paddle.w;
+  paddle.x = Math.max(0, Math.min(W-pw, e.clientX-r.left-pw/2));
+  balls.forEach(b => { if (!b.launched) b.x = paddle.x+pw/2; });
+});
+canvas.addEventListener('touchmove', e => {
+  if (state!=='playing') return;
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  const pw = activePowers.wide>0 ? Math.min(W, paddle.w+40) : paddle.w;
+  paddle.x = Math.max(0, Math.min(W-pw, e.touches[0].clientX-r.left-pw/2));
+  balls.forEach(b => { if (!b.launched) b.x = paddle.x+pw/2; });
+}, { passive:false });
+canvas.addEventListener('click', () => {
+  if (state==='playing') {
+    getAudio();
+    balls.forEach(b => { if (!b.launched) b.launched=true; });
+    document.getElementById('msg').textContent = '';
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.code==='Space') {
+    e.preventDefault();
+    if (state==='playing')      { state='paused';  sndPause();  document.getElementById('msg').textContent='⏸  PAUSED — SPACE TO RESUME'; drawPauseOverlay(); }
+    else if (state==='paused')  { state='playing'; sndResume(); document.getElementById('msg').textContent=''; loop(); }
+  }
+});
+
+// ── Particles ──────────────────────────────────────────────────────────────────
+function spawnParticles(x,y,color,n) {
+  for (let i=0;i<n;i++) {
+    const a = Math.random()*Math.PI*2, sp = 1+Math.random()*3;
+    particles.push({ x,y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1, decay:0.035+Math.random()*0.04, color, r:2+Math.random()*3 });
+  }
+}
+
+// ── Power-ups ─────────────────────────────────────────────────────────────────
+function dropPowerup(x,y) {
+  const types=['wide','slow','multi'];
+  powerups.push({ x, y, type:types[Math.floor(Math.random()*types.length)] });
+}
+function applyPowerup(type) {
+  if (type==='wide')  { activePowers.wide=360; showToast('WIDE PADDLE!'); }
+  if (type==='slow')  { activePowers.slow=300; showToast('SLOW MOTION!'); }
+  if (type==='multi') {
+    const ref = balls.find(b=>b.launched);
+    if (ref && balls.length<4) {
+      balls.push({ x:ref.x, y:ref.y, vx:-ref.vx*0.9, vy:ref.vy, launched:true });
+      showToast('MULTI-BALL!');
+    }
+  }
+  updatePwrBar();
+}
+
+// ── Tick ───────────────────────────────────────────────────────────────────────
+function tick() {
+  if (activePowers.wide>0) { activePowers.wide--; if(activePowers.wide===0) showToast('WIDE PADDLE EXPIRED'); }
+  if (activePowers.slow>0) activePowers.slow--;
+  if ((activePowers.wide+activePowers.slow)%60===0) updatePwrBar();
+
+  const pw = activePowers.wide>0 ? Math.min(W, paddle.w+40) : paddle.w;
+  const sm = activePowers.slow>0 ? 0.6 : 1.0;
+
+  // Power-ups fall
+  powerups.forEach(p => { p.y+=2; });
+  powerups = powerups.filter(p => {
+    if (p.y>H) return false;
+    if (p.y+8>=paddle.y && p.y-8<=paddle.y+PADDLE_H && p.x>=paddle.x && p.x<=paddle.x+pw) {
+      applyPowerup(p.type);
+      spawnParticles(p.x,p.y,'#ffff00',10);
+      sndPowerup();
+      sessionStats.totalPowerups++;
+      return false;
+    }
+    return true;
+  });
+
+  // Balls
+  balls.forEach(ball => {
+    if (!ball.launched) return;
+    ball.x += ball.vx*sm; ball.y += ball.vy*sm;
+    if (ball.x-BALL_R<0)  { ball.x=BALL_R;   ball.vx= Math.abs(ball.vx); sndWall(); }
+    if (ball.x+BALL_R>W)  { ball.x=W-BALL_R; ball.vx=-Math.abs(ball.vx); sndWall(); }
+    if (ball.y-BALL_R<0)  { ball.y=BALL_R;   ball.vy= Math.abs(ball.vy); sndWall(); }
+    // Paddle
+    if (ball.vy>0 && ball.y+BALL_R>=paddle.y && ball.y-BALL_R<=paddle.y+PADDLE_H &&
+        ball.x>=paddle.x-4 && ball.x<=paddle.x+pw+4) {
+      const hit=(ball.x-(paddle.x+pw/2))/(pw/2);
+      const ang=hit*60*Math.PI/180;
+      const sp=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
+      ball.vx=sp*Math.sin(ang); ball.vy=-Math.abs(sp*Math.cos(ang));
+      ball.y=paddle.y-BALL_R-1;
+      spawnParticles(ball.x,paddle.y,'#5ee8d0',6); sndPaddle();
+    }
+    // Blocks
+    for (const b of blocks) {
+      if (!b.alive) continue;
+      if (ball.x+BALL_R>b.x && ball.x-BALL_R<b.x+b.w && ball.y+BALL_R>b.y && ball.y-BALL_R<b.y+b.h) {
+        const oL=ball.x+BALL_R-b.x, oR=b.x+b.w-(ball.x-BALL_R);
+        const oT=ball.y+BALL_R-b.y, oB=b.y+b.h-(ball.y-BALL_R);
+        const mn=Math.min(oL,oR,oT,oB);
+        if (mn===oL||mn===oR) ball.vx*=-1; else ball.vy*=-1;
+        b.hp--;
+        if (b.hp<=0) {
+          b.alive=false; score+=10*level; sessionStats.totalDestroyed++;
+          updateHud(); spawnParticles(ball.x,ball.y,b.glow,14); sndBlockDie();
+          if (b.hasPowerup) dropPowerup(b.x+b.w/2, b.y+b.h);
+        } else {
+          spawnParticles(ball.x,ball.y,b.glow,5); sndBlockHit();
+        }
+        break;
+      }
+    }
+  });
+
+  // Lost balls
+  const before = balls.length;
+  balls = balls.filter(b => b.y-BALL_R<=H);
+  if (before>balls.length && balls.length===0) {
+    ballLostThisLevel=true; lives--; sndLifeLost(); updateHud(); saveBest();
+    if (lives<=0) {
+      state='dead';
+      checkAchievements({...sessionStats, bestScore:score});
+      document.getElementById('msg').textContent = 'DEPTH EXCEEDED — RETRY?';
+      document.getElementById('startBtn').style.display='inline-block';
+      document.getElementById('startBtn').textContent='TRY AGAIN';
+      document.getElementById('startBtn').onclick=()=>startGame(false);
+      document.getElementById('dailyBtn').style.display='inline-block';
+      return;
+    }
+    balls=[makeBall(level)];
+    document.getElementById('msg').textContent='CLICK TO RELAUNCH';
+  }
+
+  // Level complete
+  if (blocks.every(b=>!b.alive)) {
+    sessionStats.levelsCleared++;
+    if (!ballLostThisLevel) sessionStats.perfectLevel=true;
+    checkAchievements({...sessionStats, bestScore:score});
+    saveBest(); level++; updateHud(); sndLevelUp();
+    if (level>5) {
+      state='win';
+      document.getElementById('msg').textContent='🌊 SURFACE REACHED — YOU WIN!';
+      document.getElementById('startBtn').style.display='inline-block';
+      document.getElementById('startBtn').textContent='DIVE AGAIN';
+      document.getElementById('startBtn').onclick=()=>startGame(false);
+      document.getElementById('dailyBtn').style.display='inline-block';
+      return;
+    }
+    initLevel(level);
+    document.getElementById('msg').textContent='LEVEL '+level+' — CLICK TO LAUNCH';
+  }
+
+  for (const p of particles) { p.x+=p.vx; p.y+=p.vy; p.life-=p.decay; }
+  particles = particles.filter(p=>p.life>0);
+}
+
+// ── Draw ───────────────────────────────────────────────────────────────────────
+function drawBg() {
+  ctx.fillStyle='#050d1a'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#0a1f2a'; ctx.lineWidth=0.5;
+  for (let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for (let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+}
+function drawBlock(b) {
+  if (!b.alive) return;
+  const frac=b.hp/b.maxhp;
+  ctx.fillStyle=b.fill;
+  ctx.beginPath(); ctx.roundRect(b.x,b.y,b.w,b.h,3); ctx.fill();
+  ctx.shadowColor=b.glow; ctx.shadowBlur=6+frac*8;
+  ctx.strokeStyle=b.glow+Math.round(80+frac*175).toString(16).padStart(2,'0');
+  ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.roundRect(b.x,b.y,b.w,b.h,3); ctx.stroke();
+  ctx.shadowBlur=0;
+  if (b.maxhp>1) {
+    ctx.fillStyle=b.glow+'cc';
+    const sp=6, tot=b.hp, sx=b.x+b.w/2-(tot-1)*sp/2;
+    for (let i=0;i<tot;i++){ctx.beginPath();ctx.arc(sx+i*sp,b.y+b.h-5,2,0,Math.PI*2);ctx.fill();}
+  }
+  if (b.hasPowerup && b.hp>0) {
+    ctx.fillStyle='#ffff00cc';
+    ctx.beginPath(); ctx.arc(b.x+b.w-5,b.y+5,3,0,Math.PI*2); ctx.fill();
+  }
+}
+function drawPaddle() {
+  const pw=activePowers.wide>0?Math.min(W,paddle.w+40):paddle.w;
+  const col=activePowers.wide>0?'#00aaff':'#00ffcc';
+  const g=ctx.createLinearGradient(paddle.x,0,paddle.x+pw,0);
+  g.addColorStop(0,'#005f5f'); g.addColorStop(0.5,col); g.addColorStop(1,'#005f5f');
+  ctx.shadowColor=col; ctx.shadowBlur=12; ctx.fillStyle=g;
+  ctx.beginPath(); ctx.roundRect(paddle.x,paddle.y,pw,PADDLE_H,5); ctx.fill();
+  ctx.shadowBlur=0;
+}
+function drawBalls() {
+  balls.forEach(ball => {
+    const sk=SKINS[activeSkin];
+    ctx.shadowColor='#00eeff'; ctx.shadowBlur=18;
+    const g=ctx.createRadialGradient(ball.x-2,ball.y-2,1,ball.x,ball.y,BALL_R);
+    g.addColorStop(0,sk.inner); g.addColorStop(0.5,sk.mid); g.addColorStop(1,sk.outer);
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(ball.x,ball.y,BALL_R,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    if (activePowers.slow>0) {
+      ctx.strokeStyle='#cc00ff44'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(ball.x,ball.y,BALL_R+4,0,Math.PI*2); ctx.stroke();
+    }
+  });
+}
+function drawPowerups() {
+  const colors={wide:'#00aaff',slow:'#cc00ff',multi:'#00ff88'};
+  const labels={wide:'W',slow:'S',multi:'M'};
+  powerups.forEach(p => {
+    const c=colors[p.type];
+    ctx.shadowColor=c; ctx.shadowBlur=10;
+    ctx.fillStyle=c+'44'; ctx.strokeStyle=c; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle=c; ctx.font='bold 10px Courier New'; ctx.textAlign='center';
+    ctx.fillText(labels[p.type],p.x,p.y+4); ctx.textAlign='left';
+  });
+}
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.globalAlpha=p.life; ctx.fillStyle=p.color; ctx.shadowColor=p.color; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha=1; ctx.shadowBlur=0;
+}
+function drawPauseOverlay() {
+  ctx.fillStyle='rgba(5,13,26,0.78)'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#5ee8d0'; ctx.font='bold 24px Courier New'; ctx.textAlign='center';
+  ctx.fillText('— PAUSED —',W/2,H/2);
+  ctx.font='12px Courier New'; ctx.fillStyle='#3a8a80';
+  ctx.fillText('PRESS SPACE TO RESUME',W/2,H/2+28);
+  ctx.textAlign='left';
+}
+function drawIdleScreen() {
+  drawBg();
+  ctx.fillStyle='#00ffcc15'; ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center';
+  ctx.fillStyle='#5ee8d0'; ctx.font='bold 32px Courier New';
+  ctx.fillText('DEEP BREAK',W/2,H/2-38);
+  ctx.font='14px Courier New'; ctx.fillStyle='#3a8a80';
+  ctx.fillText('BIOLUMINESCENT EDITION',W/2,H/2-10);
+  ctx.font='11px Courier New'; ctx.fillStyle='#1a5a58';
+  ctx.fillText('POWER-UPS  ·  ACHIEVEMENTS  ·  DAILY CHALLENGE',W/2,H/2+16);
+  const save=loadSave();
+  if (save.bestScore) {
+    ctx.fillStyle='#2a6060';
+    ctx.fillText('YOUR BEST: '+save.bestScore+' pts   ·   TOP LEVEL: '+save.bestLevel,W/2,H/2+42);
+  }
+  ctx.fillStyle='#ffaa0055'; ctx.font='11px Courier New';
+  ctx.fillText('START DIVE  or  DAILY CHALLENGE  ↓',W/2,H/2+68);
+  ctx.textAlign='left';
+}
+
+// ── Loop ───────────────────────────────────────────────────────────────────────
+function loop() {
+  if (state!=='playing') return;
+  tick(); drawBg();
+  blocks.forEach(drawBlock);
+  drawPowerups(); drawPaddle(); drawBalls(); drawParticles();
+  requestAnimationFrame(loop);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+initDailyUI(); updateHud(); renderAchievements(); drawIdleScreen();
+</script>
+</body>
+</html>
