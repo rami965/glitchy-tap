@@ -145,6 +145,7 @@
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
+      contain: layout paint;
     }
 
     /* Deep Break */
@@ -171,12 +172,13 @@
       height: 8%;
       border-radius: 3px;
       opacity: .85;
+      will-change: opacity;
       animation: db-block-pulse ease-in-out infinite alternate;
     }
 
     @keyframes db-block-pulse {
-      from { opacity: .6; box-shadow: none; }
-      to   { opacity: 1; box-shadow: 0 0 6px currentColor; }
+      from { opacity: .55; }
+      to   { opacity: 1; }
     }
 
     .db-ball-anim {
@@ -238,6 +240,7 @@
       color: rgba(0,0,0,.8);
       animation: ws-fall linear infinite;
       opacity: 0;
+      will-change: transform;
     }
 
     @keyframes ws-fall {
@@ -472,14 +475,15 @@
 
     function deepBreakThumb() {
       let blocks = '';
+      // 3 rows × 3 cols = 9 blocks (down from 15)
       for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 5; col++) {
+        for (let col = 0; col < 3; col++) {
           const color = DB_COLORS[(row * 2 + col) % DB_COLORS.length];
-          const left  = col * 19 + 2;
-          const top   = row * 10 + 6;
-          const dur   = (1.4 + row * 0.35 + col * 0.15).toFixed(1);
-          const del   = -(row * 0.3 + col * 0.1).toFixed(1);
-          blocks += `<div class="db-block" style="left:${left}%;top:${top}%;width:17%;background:${color};color:${color};animation-duration:${dur}s;animation-delay:${del}s;"></div>`;
+          const left  = col * 30 + 5;
+          const top   = row * 11 + 6;
+          const dur   = (1.5 + row * 0.4 + col * 0.2).toFixed(1);
+          const del   = -(row * 0.4 + col * 0.15).toFixed(1);
+          blocks += `<div class="db-block" style="left:${left}%;top:${top}%;width:26%;background:${color};animation-duration:${dur}s;animation-delay:${del}s;"></div>`;
         }
       }
       return `<div class="card-thumb thumb-deep-break">${blocks}<div class="db-ball-anim"></div><div class="db-paddle-anim"></div><div class="card-overlay"></div></div>`;
@@ -487,11 +491,12 @@
 
     function wordStormThumb() {
       let tiles = '';
-      for (let i = 0; i < 12; i++) {
+      // 8 tiles (down from 12)
+      for (let i = 0; i < 8; i++) {
         const col  = i % 5;
         const left = col * 20 + 1;
-        const dur  = (2.5 + (i * 0.31) % 1.8).toFixed(1);
-        const del  = -(i * 0.85 % 5).toFixed(1);
+        const dur  = (2.8 + (i * 0.38) % 1.6).toFixed(1);
+        const del  = -(i * 0.9 % 5).toFixed(1);
         const ltr  = LETTERS[i % LETTERS.length];
         tiles += `<div class="ws-tile" style="left:${left}%;background:${COL_COLORS[col]};animation-duration:${dur}s;animation-delay:${del}s;">${ltr}</div>`;
       }

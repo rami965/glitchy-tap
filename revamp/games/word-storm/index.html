@@ -117,6 +117,7 @@
       color: rgba(0,0,0,.85);
       opacity: 0;
       animation: rain-fall linear infinite;
+      will-change: transform;
     }
 
     @keyframes rain-fall {
@@ -328,19 +329,19 @@
       display: block;
     }
 
-    /* ── Glass modal fullscreen ── */
+    /* ── Dark overlay fullscreen ── */
     body.glass-fs { overflow: hidden; }
+
+    body.glass-fs .home-pill { display: none; }
 
     body.glass-fs .cabinet-screen {
       position: fixed;
       inset: 0;
-      z-index: 1000;
+      z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(5, 7, 20, 0.78);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: #050714;
       border-radius: 0;
       aspect-ratio: unset;
       max-height: none;
@@ -350,22 +351,19 @@
     body.glass-fs .cabinet-screen iframe {
       width: 400px;
       height: 680px;
-      max-height: 86vh;
-      max-width: 90vw;
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow:
-        0 0 0 1px rgba(0,229,255,.18),
-        0 0 50px rgba(0,229,255,.14),
-        0 40px 100px rgba(0,0,0,.6);
+        0 0 0 1px rgba(0,229,255,.2),
+        0 30px 80px rgba(0,0,0,.8);
     }
 
-    /* Close button — visible only in glass fullscreen */
+    /* Close button — visible only in dark overlay */
     .fs-close {
       display: none;
       position: absolute;
       top: 1.25rem;
       right: 1.25rem;
-      z-index: 1001;
+      z-index: 10000;
       align-items: center;
       gap: .4rem;
       padding: .45rem .9rem;
@@ -828,11 +826,12 @@
           <!-- Visible only in fullscreen -->
           <button class="fs-close" id="btn-close-fs" aria-label="Exit fullscreen">✕ CLOSE</button>
           <iframe
-            src="./word-storm.html"
+            data-src="./word-storm.html"
+            src="about:blank"
             sandbox="allow-scripts allow-same-origin"
             scrolling="no"
             title="Word Storm — web version"
-            loading="lazy">
+            id="game-iframe">
           </iframe>
         </div>
 
@@ -976,21 +975,21 @@
 
 
 <script>
-  // ── Falling letter tiles in hero ──
+  // ── Falling letter tiles in hero (15 tiles = 3 per column) ──
   const COLORS  = ['#00e5ff','#b84fff','#00ffb3','#ff8c00','#ff4fa3'];
   const LETTERS = 'STORMWORDSPEAKLIFTBEND'.split('');
   const rain    = document.getElementById('hero-rain');
 
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 15; i++) {
     const tile = document.createElement('div');
     tile.className = 'rain-tile';
     const col  = i % 5;
-    const left = col * 20 + 1 + (i % 3) * 2;
+    const left = col * 20 + 2 + (i % 3) * 3;
     tile.style.cssText = `
       left: ${left}%;
       background: ${COLORS[col]};
-      animation-duration: ${(5 + (i * 0.37) % 5).toFixed(1)}s;
-      animation-delay: -${(i * 0.7 % 8).toFixed(1)}s;
+      animation-duration: ${(5.5 + (i * 0.4) % 4).toFixed(1)}s;
+      animation-delay: -${(i * 0.9 % 7).toFixed(1)}s;
     `;
     tile.textContent = LETTERS[i % LETTERS.length];
     rain.appendChild(tile);
@@ -999,14 +998,30 @@
   // ── How to Play ──
   const htpBtn  = document.getElementById('htp-btn');
   const htpBody = document.getElementById('htp-body');
-
   htpBtn.addEventListener('click', () => {
     const open = htpBody.classList.toggle('open');
     htpBtn.setAttribute('aria-expanded', open);
   });
 
-  // ── Glass modal fullscreen ──
+  // ── Lazy-load game iframe on scroll ──
+  const gameIframe = document.getElementById('game-iframe');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !gameIframe.dataset.loaded) {
+        gameIframe.src = gameIframe.dataset.src;
+        gameIframe.dataset.loaded = '1';
+        obs.disconnect();
+      }
+    });
+  }, { threshold: 0.1 });
+  obs.observe(gameIframe);
+
+  // ── Dark overlay fullscreen ──
   document.getElementById('btn-fs').addEventListener('click', () => {
+    if (!gameIframe.dataset.loaded) {
+      gameIframe.src = gameIframe.dataset.src;
+      gameIframe.dataset.loaded = '1';
+    }
     document.body.classList.toggle('glass-fs');
   });
 

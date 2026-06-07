@@ -46,6 +46,7 @@
       background: radial-gradient(circle at 30% 30%, rgba(0,212,255,.22), transparent 70%);
       border: 1px solid rgba(0,212,255,.1);
       animation: rise linear infinite;
+      will-change: transform;
     }
 
     .bubble:nth-child(1)  { width: 8px;  height: 8px;  left: 6%;  animation-duration: 13s; animation-delay: 0s;   opacity: .55; }
@@ -318,7 +319,7 @@
 
     /* Game portal — wide cabinet for Deep Break (580px game) */
     .game-portal {
-      max-width: 680px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
@@ -349,46 +350,49 @@
       white-space: nowrap;
     }
 
-    /* Screen — scrollable so the 580px game fits on all viewports */
+    /* Screen — overflow hidden, iframe scaled via JS to always fit */
     .portal-screen {
       border-radius: 10px;
-      overflow: auto;
+      overflow: hidden;
       background: #050d1a;
-      max-height: 75vh;
       position: relative;
     }
 
+    /* Iframe wide enough to accommodate the game's 692px mid-row overflow */
     .portal-screen iframe {
-      width: 600px;
+      width: 840px;
       height: 730px;
       border: none;
       display: block;
+      transform-origin: top left;
     }
 
-    /* ── Glass modal fullscreen ── */
+    /* ── Dark overlay fullscreen ── */
     body.glass-fs { overflow: hidden; }
+
+    body.glass-fs .home-pill,
+    body.glass-fs .depth-meter { display: none; }
 
     body.glass-fs .portal-screen {
       position: fixed;
       inset: 0;
-      z-index: 1000;
+      z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(2, 8, 22, 0.78);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: #020810;
       border-radius: 0;
-      max-height: none;
+      height: auto !important;
       overflow: auto;
     }
 
+    /* Reset JS-applied scaling inside the overlay */
     body.glass-fs .portal-screen iframe {
-      border-radius: 12px;
-      box-shadow:
-        0 0 0 1px rgba(0,212,255,.18),
-        0 0 50px rgba(0,212,255,.14),
-        0 40px 100px rgba(0,0,0,.6);
+      transform: none !important;
+      width: 840px;
+      height: 730px;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(0,212,255,.2), 0 30px 80px rgba(0,0,0,.8);
     }
 
     /* Portal chrome bar */
@@ -735,7 +739,7 @@
       position: absolute;
       top: 1rem;
       right: 1rem;
-      z-index: 9999;
+      z-index: 10000;
       align-items: center;
       gap: .4rem;
       padding: .45rem .9rem;
@@ -771,12 +775,11 @@
     GlitchyTap
   </a>
 
-  <!-- Rising bubbles -->
+  <!-- Rising bubbles (8 instead of 12 for perf) -->
   <div class="bubbles" aria-hidden="true">
     <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
     <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
-    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
-    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    <div class="bubble"></div><div class="bubble"></div>
   </div>
 
   <!-- Depth meter -->
@@ -839,11 +842,12 @@
           <!-- Visible only in fullscreen -->
           <button class="fs-close" id="btn-close-fs" aria-label="Exit fullscreen">✕ CLOSE</button>
           <iframe
-            src="./deep-break.html"
+            data-src="./deep-break.html"
+            src="about:blank"
             sandbox="allow-scripts allow-same-origin"
             scrolling="no"
             title="Deep Break — Bioluminescent Edition — web version"
-            loading="lazy">
+            id="game-iframe">
           </iframe>
         </div>
 
@@ -979,22 +983,48 @@
 
 
   <script>
-    // How to Play toggle
+    // ── How to Play toggle ──
     const htpBtn  = document.getElementById('htp-btn');
     const htpBody = document.getElementById('htp-body');
-
     htpBtn.addEventListener('click', () => {
       const open = htpBody.classList.toggle('open');
       htpBtn.setAttribute('aria-expanded', open);
     });
 
-    // Glass modal fullscreen
+    // ── Scale game to fit container width ──
+    const portalScreen = document.getElementById('portal-screen');
+    const gameIframe   = document.getElementById('game-iframe');
+
+    function scalePortal() {
+      if (document.body.classList.contains('glass-fs')) return;
+      const scale = Math.min(1, portalScreen.clientWidth / 840);
+      gameIframe.style.transform = scale < 1 ? `scale(${scale})` : '';
+      portalScreen.style.height  = Math.ceil(730 * scale) + 'px';
+    }
+    window.addEventListener('resize', scalePortal);
+    scalePortal();
+
+    // ── Lazy-load game iframe on scroll ──
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !gameIframe.dataset.loaded) {
+          gameIframe.src = gameIframe.dataset.src;
+          gameIframe.dataset.loaded = '1';
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+    obs.observe(portalScreen);
+
+    // ── Dark overlay fullscreen ──
     document.getElementById('btn-fs').addEventListener('click', () => {
       document.body.classList.toggle('glass-fs');
+      if (!document.body.classList.contains('glass-fs')) scalePortal();
     });
 
     document.getElementById('btn-close-fs').addEventListener('click', () => {
       document.body.classList.remove('glass-fs');
+      scalePortal();
     });
   </script>
 
