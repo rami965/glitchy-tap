@@ -15,7 +15,7 @@ const GAMES = [
     tagline: 'Spell fast. Score big.',
     genre: 'Puzzle · Word Game',
     status: 'poc-only',
-    platforms: ['web'],
+    platforms: ['web', 'android'],
     cardTheme: { bg: '#0a0e2a', accent: '#00e5ff', text: '#ffffff' },
     internalPage: 'games/word-storm/'
   }

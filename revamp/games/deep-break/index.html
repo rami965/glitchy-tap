@@ -692,6 +692,61 @@
     .footer-nav a { font-size: .78rem; color: var(--game-muted); text-decoration: none; transition: color .2s; }
     .footer-nav a:hover { color: var(--game-text); }
 
+    /* Home pill */
+    .home-pill {
+      position: fixed;
+      top: 1.25rem;
+      left: 1.25rem;
+      z-index: 100;
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .4rem .9rem .4rem .65rem;
+      background: rgba(2, 8, 16, 0.82);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,212,255,.22);
+      border-radius: 999px;
+      color: var(--game-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .3px;
+      text-decoration: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .home-pill:hover {
+      border-color: rgba(0,212,255,.5);
+      box-shadow: 0 0 14px rgba(0,212,255,.2);
+    }
+    .home-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* Close button — visible only in fullscreen */
+    .fs-close {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      align-items: center;
+      gap: .4rem;
+      padding: .45rem .9rem;
+      background: rgba(2, 8, 16, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: .5rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .portal-screen:-webkit-full-screen .fs-close { display: flex; }
+    .portal-screen:fullscreen .fs-close { display: flex; }
+    .fs-close:hover { border-color: rgba(255,255,255,.45); background: rgba(2,8,16,.96); }
+
     @media (max-width: 600px) {
       .depth-meter { display: none; }
       .site-footer { flex-direction: column; align-items: flex-start; }
@@ -699,6 +754,14 @@
   </style>
 </head>
 <body>
+
+  <!-- Home pill -->
+  <a class="home-pill" href="../../" aria-label="Back to GlitchyTap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+    </svg>
+    GlitchyTap
+  </a>
 
   <!-- Rising bubbles -->
   <div class="bubbles" aria-hidden="true">
@@ -765,6 +828,8 @@
     <div class="game-portal">
       <div class="portal-frame">
         <div class="portal-screen" id="portal-screen">
+          <!-- Visible only in fullscreen -->
+          <button class="fs-close" id="btn-close-fs" aria-label="Exit fullscreen">✕ CLOSE</button>
           <iframe
             src="./deep-break.html"
             sandbox="allow-scripts allow-same-origin"
@@ -923,6 +988,10 @@
       } else {
         document.exitFullscreen && document.exitFullscreen();
       }
+    });
+
+    document.getElementById('btn-close-fs').addEventListener('click', () => {
+      document.exitFullscreen && document.exitFullscreen();
     });
   </script>
 

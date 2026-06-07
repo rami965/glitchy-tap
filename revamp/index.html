@@ -165,22 +165,57 @@
         repeating-linear-gradient(0deg, rgba(0,212,255,.03) 0px, rgba(0,212,255,.03) 1px, transparent 1px, transparent 22px);
     }
 
-    .thumb-deep-break .db-orb {
+    /* Deep Break card — animated gameplay preview */
+    .db-block {
       position: absolute;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      top: 50%;
-      left: 55%;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle at 33% 33%, #b8f0ff, #00d4ff 40%, #0066a0 72%, #001828);
-      box-shadow: 0 0 24px rgba(0,212,255,.85), 0 0 60px rgba(0,212,255,.4);
-      animation: orb-pulse 3s ease-in-out infinite;
+      height: 8%;
+      border-radius: 3px;
+      opacity: .85;
+      animation: db-block-pulse ease-in-out infinite alternate;
     }
 
-    @keyframes orb-pulse {
-      0%,100% { box-shadow: 0 0 24px rgba(0,212,255,.85),0 0 60px rgba(0,212,255,.4); }
-      50%      { box-shadow: 0 0 40px rgba(0,212,255,1),0 0 90px rgba(0,212,255,.6); }
+    @keyframes db-block-pulse {
+      from { opacity: .6; box-shadow: none; }
+      to   { opacity: 1; box-shadow: 0 0 6px currentColor; }
+    }
+
+    .db-ball-anim {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #b8f0ff;
+      box-shadow: 0 0 10px #00d4ff, 0 0 22px rgba(0,212,255,.55);
+      animation: db-ball 2.4s ease-in-out infinite;
+    }
+
+    @keyframes db-ball {
+      0%   { left: 22%; top: 72%; }
+      20%  { left: 68%; top: 42%; }
+      45%  { left: 48%; top: 22%; }
+      65%  { left: 18%; top: 44%; }
+      85%  { left: 55%; top: 68%; }
+      100% { left: 22%; top: 72%; }
+    }
+
+    .db-paddle-anim {
+      position: absolute;
+      bottom: 12%;
+      width: 32%;
+      height: 5px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #00d4ff, #7b2fff);
+      box-shadow: 0 0 8px rgba(0,212,255,.7);
+      animation: db-paddle 2.4s ease-in-out infinite;
+    }
+
+    @keyframes db-paddle {
+      0%   { left: 12%; }
+      20%  { left: 52%; }
+      45%  { left: 32%; }
+      65%  { left: 8%; }
+      85%  { left: 44%; }
+      100% { left: 12%; }
     }
 
     /* Word Storm */
@@ -233,6 +268,9 @@
     .card-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
 
     .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
       font-family: 'Space Grotesk', sans-serif;
       font-size: .58rem;
       font-weight: 600;
@@ -242,6 +280,12 @@
       border: 1px solid var(--border);
       padding: .2rem .55rem;
       border-radius: 4px;
+    }
+
+    .tag-icon {
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
     }
 
     .tag-web     { color: #00e5ff; border-color: rgba(0,229,255,.3); }
@@ -403,23 +447,42 @@
     const COL_COLORS = ['#00e5ff','#b84fff','#00ffb3','#ff8c00','#ff4fa3'];
     const LETTERS    = 'STORMWORDSPELLFAST'.split('');
 
-    const PLATFORM_MAP = {
-      android: { label: 'Android', cls: 'tag-android' },
-      ios:     { label: 'iOS',     cls: 'tag-ios' },
-      web:     { label: 'Web POC', cls: 'tag-web' }
+    const STATUS_MAP = {
+      'live':        { label: 'Live',        cls: 'tag-live' },
+      'poc-only':    { label: 'In Dev',      cls: 'tag-poc' },
+      'coming-soon': { label: 'Coming Soon', cls: 'tag' }
     };
 
-    const STATUS_MAP = {
-      'live':        { label: 'Live',         cls: 'tag-live' },
-      'poc-only':    { label: 'In Dev',       cls: 'tag-poc' },
-      'coming-soon': { label: 'Coming Soon',  cls: 'tag' }
-    };
+    const WEB_ICON = `<svg class="tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+    const GP_ICON  = `<svg class="tag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.36.6 1.24 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>`;
+    const HG_ICON  = `<svg class="tag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 2v6l4 4-4 4v6h12v-6l-4-4 4-4V2H6zm10 14.5V20H8v-3.5l4-4 4 4zm-4-5l-4-4V4h8v3.5l-4 4z"/></svg>`;
+
+    function renderPlatformTag(platform, status) {
+      if (platform === 'web') {
+        return `<span class="tag tag-web">${WEB_ICON}Web</span>`;
+      }
+      if (platform === 'android') {
+        const live = status === 'live';
+        return `<span class="tag tag-android">${live ? GP_ICON : HG_ICON}Android${live ? '' : ' Soon'}</span>`;
+      }
+      return `<span class="tag">${platform}</span>`;
+    }
+
+    const DB_COLORS = ['#00d4ff','#7b2fff','#39ff84','#00aaff','#ff8c00'];
 
     function deepBreakThumb() {
-      return `<div class="card-thumb thumb-deep-break">
-        <div class="db-orb"></div>
-        <div class="card-overlay"></div>
-      </div>`;
+      let blocks = '';
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 5; col++) {
+          const color = DB_COLORS[(row * 2 + col) % DB_COLORS.length];
+          const left  = col * 19 + 2;
+          const top   = row * 10 + 6;
+          const dur   = (1.4 + row * 0.35 + col * 0.15).toFixed(1);
+          const del   = -(row * 0.3 + col * 0.1).toFixed(1);
+          blocks += `<div class="db-block" style="left:${left}%;top:${top}%;width:17%;background:${color};color:${color};animation-duration:${dur}s;animation-delay:${del}s;"></div>`;
+        }
+      }
+      return `<div class="card-thumb thumb-deep-break">${blocks}<div class="db-ball-anim"></div><div class="db-paddle-anim"></div><div class="card-overlay"></div></div>`;
     }
 
     function wordStormThumb() {
@@ -441,12 +504,11 @@
     };
 
     function renderCard(game) {
-      const thumb   = (THUMBS[game.slug] || wordStormThumb)();
-      const status  = STATUS_MAP[game.status] || { label: game.status, cls: 'tag' };
-      const platTags = game.platforms.map(p => {
-        const m = PLATFORM_MAP[p] || { label: p, cls: 'tag' };
-        return `<span class="tag ${m.cls}">${m.label}</span>`;
-      }).join('');
+      const thumb  = (THUMBS[game.slug] || wordStormThumb)();
+      const status = STATUS_MAP[game.status] || { label: game.status, cls: 'tag' };
+      const PLAT_ORDER = { web: 0, android: 1, ios: 2 };
+      const sorted = [...game.platforms].sort((a, b) => (PLAT_ORDER[a] ?? 9) - (PLAT_ORDER[b] ?? 9));
+      const platTags = sorted.map(p => renderPlatformTag(p, game.status)).join('');
 
       return `
         <a class="game-card" href="${game.internalPage}" aria-label="${game.title} — view game page">
