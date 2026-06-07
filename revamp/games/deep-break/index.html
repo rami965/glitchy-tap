@@ -365,6 +365,23 @@
       display: block;
     }
 
+    /* Center the game when in fullscreen */
+    .portal-screen:-webkit-full-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #050d1a;
+      overflow: auto;
+    }
+
+    .portal-screen:fullscreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #050d1a;
+      overflow: auto;
+    }
+
     /* Portal chrome bar */
     .portal-bar {
       display: flex;
